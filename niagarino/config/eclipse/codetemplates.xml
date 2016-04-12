@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><templates><template autoinsert="false" context="newtype_context" deleted="true" description="Newly created files" enabled="true" id="org.eclipse.jdt.ui.text.codetemplates.newtype" name="newtype">/*
+ * @(#)${file_name}   1.0   ${date}
+ *
+ * Copyright (c) 2011-2012 Portland State University.
+ * Copyright (c) 2013-${year} University of Konstanz.
+ *
+ * This software is the proprietary information of the above-mentioned institutions.
+ * Use is subject to license terms. Please refer to the included copyright notice.
+ */
+${package_declaration}
+
+${typecomment}
+${type_declaration}</template></templates>

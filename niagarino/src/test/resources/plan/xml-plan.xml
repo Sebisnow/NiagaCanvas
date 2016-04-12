@@ -1,0 +1,117 @@
+<plan>
+  <schema name="cardata">
+    <int name="type" />
+    <int name="time" />
+    <int name="vid" />
+    <double name="spd" />
+    <int name="xway" />
+    <int name="lane" />
+    <int name="dir" />
+    <int name="seg" />
+    <int name="pos" />
+    <int name="qid" />
+    <int name="s_init" />
+    <int name="s_end" />
+    <int name="dow" />
+    <int name="tod" />
+    <int name="day" />
+  </schema>
+
+  <stream name="first-part">
+    <scan name="cardata-scan">
+      <schema name="cardata" />
+      <file uri="cardatapoints.out.sorted" />
+    </scan>
+
+    <selection name="select-type-0">
+      <equals attribute="type" value="0" />
+    </selection>
+
+    <multiplex name="multiplex-type-0" />
+  </stream>
+
+  <stream name="lav-calculation" previous="first-part">
+    <window name="window-avgsv" type="value" trailing="true">
+      <attribute name="time" />
+      <size>60</size>
+      <slide>60</slide>
+    </window>
+
+    <aggregate name="avgsv">
+      <group>
+        <attribute name="vid" />
+        <attribute name="xway" />
+        <attribute name="seg" />
+        <attribute name="dir" />
+      </group>
+      <functions>
+        <average attribute="spd" />
+      </functions>
+    </aggregate>
+
+    <operator name="avgsv-segid" type="derive">
+      <java attribute="segid">
+        final int xway = (int) tuple.get(2);
+        final int dir = (int) tuple.get(3);
+        final int seg = (int) tuple.get(4);
+        return xway &lt;&lt; 8 | dir &lt;&lt; 7 | seg;
+      </java>
+    </operator>
+
+    <aggregate name="avgs">
+      <group>
+        <attribute name="xway" />
+        <attribute name="dir" />
+        <attribute name="seg" />
+        <attribute name="segid" />
+      </group>
+      <functions>
+        <average attribute="AVG(spd)" />
+        <count attribute="vid" />
+      </functions>
+    </aggregate>
+
+    <window name="window-lav" type="value">
+      <attribute name="time" />
+      <size>300</size>
+      <slide>60</slide>
+    </window>
+
+    <aggregate name="lav">
+      <group>
+        <attribute name="xway" />
+        <attribute name="dir" />
+        <attribute name="seg" />
+        <attribute name="segid" />
+        <attribute name="COUNT(vid)" />
+      </group>
+      <functions>
+        <average attribute="AVG(AVG(spd))" />
+      </functions>
+    </aggregate>
+
+    <print type="stdout" showheader="yes" />
+  </stream>
+
+  <stream name="accident-detection" previous="first-part">
+    <window name="window-cars" type="value">
+      <attribute name="time" />
+      <size>120</size>
+      <slide>60</slide>
+    </window>
+
+    <aggregate name="aggregate-cars">
+      <group>
+        <attribute name="vid" />
+      </group>
+      <functions>
+        <minimum attribute="pos" />
+        <maximum attribute="pos" />
+        <average attribute="pos" />
+        <count attribute="pos" />
+      </functions>
+    </aggregate>
+
+    <print type="devnull" />
+  </stream>
+</plan>

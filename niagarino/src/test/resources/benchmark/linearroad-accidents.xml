@@ -1,0 +1,144 @@
+<plan>
+   <schema name="cardata">
+      <int name="type" />
+      <int name="time" progressing="true" />
+      <int name="vid" />
+      <double name="spd" />
+      <int name="xway" />
+      <int name="lane" />
+      <int name="dir" />
+      <int name="seg" />
+      <int name="pos" />
+      <int name="qid" />
+      <int name="s_init" />
+      <int name="s_end" />
+      <int name="dow" />
+      <int name="tod" />
+      <int name="day" />
+   </schema>
+
+   <stream name="source">
+      <operator name="scan-cardata" class="edu.pdx.cs.niagarino.operator.Scan">
+         <schema name="cardata" />
+         <file>/home/sammy/Studium/2014ws/master-projekt/data/1.180/cardatapoints.out.sorted</file>
+<!--          <file>/home/sammy/Studium/2014ws/master-projekt/data-2014/cardatapoints.out.sorted</file> -->
+      </operator>
+
+      <operator name="derive-timestamp" class="edu.pdx.cs.niagarino.operator.Derive">
+         <object name="functions" class="kn.uni.inf.niagarino.benchmark.LinearRoad$TimestampDerivation" />
+      </operator>
+
+      <operator name="derive-time2" class="edu.pdx.cs.niagarino.operator.Derive">
+         <object name="functions" class="kn.uni.inf.niagarino.benchmark.LinearRoad$Time2Derivation" />
+      </operator>
+
+      <operator name="multiplex-source" class="edu.pdx.cs.niagarino.operator.Multiplex" />
+   </stream>
+
+<!-- ===================================================================================================== -->
+
+   <stream name="type-0-first-part" previous="source">
+      <operator name="select-type-0" class="edu.pdx.cs.niagarino.operator.Selection">
+         <object name="predicate" class="kn.uni.inf.niagarino.benchmark.LinearRoad$Type0Predicate" />
+      </operator>
+
+      <operator name="derive-segid" class="edu.pdx.cs.niagarino.operator.Derive">
+         <object name="functions" class="kn.uni.inf.niagarino.benchmark.LinearRoad$SegmentIdDerivationFunction" />
+      </operator>
+
+      <operator name="derive-minute" class="edu.pdx.cs.niagarino.operator.Derive">
+         <object name="functions" class="kn.uni.inf.niagarino.benchmark.LinearRoad$MinuteDerivation" />
+      </operator>
+
+      <operator name="multiplex-type-0" class="edu.pdx.cs.niagarino.operator.Multiplex" />
+   </stream>
+
+<!-- ===================================================================================================== -->
+
+   <stream name="type-0-accidents" previous="type-0-first-part">
+      <operator name="window-cars" class="edu.pdx.cs.niagarino.operator.ValueWindow">
+         <size>120</size>
+         <slide>30</slide>
+         <start>0</start>
+      </operator>
+
+      <operator name="aggregate-cars" class="edu.pdx.cs.niagarino.operator.OrderedAggregate">
+         <group>
+            <attribute name="vid" />
+            <attribute name="segid" />
+            <attribute name="lane" />
+         </group>
+         <functions>
+            <min attribute="pos" />
+            <max attribute="pos" />
+            <count attribute="pos" />
+            <min attribute="time2" />
+            <max attribute="time2" />
+         </functions>
+      </operator>
+
+      <c>
+         Select all cars that have stopped. This is done by checking for four position reports
+         from the same location in
+         the last two minutes.
+      </c>
+      <operator name="select-stopped-cars" class="edu.pdx.cs.niagarino.operator.Selection">
+         <object name="predicate" class="kn.uni.inf.niagarino.benchmark.LinearRoad$StoppedCarsPredicate" />
+      </operator>
+
+      <c>Window to look at the last 60 seconds of stopped cars.</c>
+      <operator name="window-stopped-cars" class="edu.pdx.cs.niagarino.operator.ValueWindow">
+         <size>60</size>
+         <slide>30</slide>
+         <start>0</start>
+      </operator>
+
+      <c>Aggregates the stopped cars so multiple stopped cars in the same location are grouped and counted.</c>
+      <operator name="aggregate-stopped-cars" class="edu.pdx.cs.niagarino.operator.OrderedAggregate">
+         <group>
+            <attribute name="MIN(pos)" />
+            <attribute name="segid" />
+            <attribute name="lane" />
+         </group>
+         <functions>
+            <min attribute="vid" />
+            <max attribute="vid" />
+            <count attribute="vid" />
+            <min attribute="MAX(time2)" />
+            <min attribute="MIN(time2)" />
+            <max attribute="MAX(time2)" />
+         </functions>
+      </operator>
+
+      <operator name="select-accidents" class="edu.pdx.cs.niagarino.operator.Selection">
+         <object name="predicate" class="kn.uni.inf.niagarino.benchmark.LinearRoad$AccidentPredicate" />
+      </operator>
+
+<!--       <operator name="window-fulltime" class="edu.pdx.cs.niagarino.operator.ValueWindow"> -->
+<!--          <size>10800</size> -->
+<!--          <slide>10800</slide> -->
+<!--          <start>0</start> -->
+<!--       </operator> -->
+
+<!--       <operator name="aggregate-fulltime" class="edu.pdx.cs.niagarino.operator.OrderedAggregate"> -->
+<!--          <group> -->
+<!--             <attribute name="MIN(vid)" /> -->
+<!--             <attribute name="MAX(vid)" /> -->
+<!--             <attribute name="MIN(pos)" /> -->
+<!--             <attribute name="segid" /> -->
+<!--          </group> -->
+<!--          <functions> -->
+<!--             <count attribute="COUNT(vid)" /> -->
+<!--             <min attribute="MIN(MIN(time2))" /> -->
+<!--             <max attribute="MAX(MAX(time2))" /> -->
+<!--          </functions> -->
+<!--       </operator> -->
+
+<!--       <operator name="storage-accidents" class="kn.uni.inf.niagarino.benchmark.AccidentsStorageOperator" /> -->
+
+      <operator name="print-accidents" class="edu.pdx.cs.niagarino.operator.Print">
+         <type>print</type>
+      </operator>
+   </stream>
+
+</plan>

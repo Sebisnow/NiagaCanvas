@@ -1,0 +1,164 @@
+package niagacanvas.operator;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import niagarino.operator.function.AggregationFunction;
+import niagarino.operator.function.StringFunction;
+import niagarino.operator.predicate.Predicate;
+import niagarino.plan.AggregateOperatorType.Group;
+
+public class ParamDescription {
+
+	/**
+	 * @param TYPES
+	 *            Maps Integers to certain class types. 1 = String, 2 = boolean,
+	 *            3 = int, 4 = double, 5 = long, 6 = Predicate, 7 = Group, 8 =
+	 *            StringFunction, 9 = AggregationFunction,
+	 * 
+	 */
+
+	public static final Map<Integer, ?> TYPES;
+
+	static {
+		Map<Integer, Object> aMap = new HashMap<Integer, Object>();
+		aMap.put(1, String.class);
+		aMap.put(2, boolean.class);
+		aMap.put(3, int.class);
+		aMap.put(4, double.class);
+		aMap.put(5, long.class);
+		aMap.put(6, Predicate.class);
+		aMap.put(7, Group.class);
+		aMap.put(8, StringFunction.class);
+		aMap.put(9, AggregationFunction.class);
+
+		TYPES = Collections.unmodifiableMap(aMap);
+	}
+
+	/**
+	 * Static filed that represents the String type as integer representation
+	 */
+	public static final int STRING = 1;
+	/**
+	 * Static filed that represents the boolean type as integer representation
+	 */
+	public static final int BOOLEAN = 2;
+	/** Static filed that represents the int type as integer representation */
+	public static final int INT = 3;
+	/**
+	 * Static filed that represents the double type as integer representation
+	 */
+	public static final int DOUBLE = 4;
+	/** Static filed that represents the long type as integer representation */
+	public static final int LONG = 5;
+	/**
+	 * Static filed that represents the Predicate type as integer representation
+	 */
+	public static final int PREDICATE = 6;
+	/** Static filed that represents the Group type as integer representation */
+	public static final int GROUP = 7;
+	/**
+	 * Static filed that represents the implementing classes of StringFunction
+	 * type as integer representation
+	 */
+	public static final int STRINGFUNCTION = 8;
+	/**
+	 * Static filed that represents the implementing classes of
+	 * AggregationFunction type as integer representation
+	 */
+	public static final int AGGREGATIONFUNCTION = 9;
+	/**
+	 * 
+	 * @param name
+	 *            The name of the parameter to describe.
+	 */
+	private String name;
+
+	/**
+	 * @param valueRange
+	 *            What type the parameter is. Conversion can be looked up in
+	 *            static method getType.
+	 */
+	private int valueRange;
+
+	/**
+	 * @param description
+	 *            The description of the parameter to be shown e.g. in the GUI.
+	 */
+	private String description;
+
+	/**
+	 * 
+	 * @param name
+	 *            The name this parameter should have.
+	 * @param range
+	 *            The range/Type of the parameter as int representation.
+	 * @param predicate2
+	 * @param description
+	 *            The description of the parameter to be shown e.g. in the GUI
+	 */
+	public ParamDescription(String name, int range, Object value, String description) {
+		this.name = name;
+		this.valueRange = range;
+		this.description = description;
+	}
+
+	/**
+	 * Getter.
+	 * 
+	 * @return The Name of the Parameter to Describe
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * Setter for the Name.
+	 * 
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * Getter.
+	 * 
+	 * @return The valueRange
+	 */
+	public int getValueRange() {
+		return valueRange;
+	}
+
+	/**
+	 * Setter for the value Range
+	 * 
+	 * @param valueRange
+	 *            The int value representing the type of the parameter
+	 * 
+	 */
+	public void setValueRange(int valueRange) {
+		this.valueRange = valueRange;
+	}
+
+	/**
+	 * Getter.
+	 * 
+	 * @return returns the description for the parameter.
+	 */
+	public String getDescription() {
+		return description;
+	}
+
+	/**
+	 * Setter for the Description of the parameter
+	 * 
+	 * @param description
+	 *            the new description of the parameter.
+	 * 
+	 */
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+}

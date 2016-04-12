@@ -1,0 +1,56 @@
+package niagaCanvas;
+
+import java.util.ArrayList;
+
+public class GuiSchema {
+
+	/**
+	 * @param attributes
+	 *            The Attributes that occur in the Schema ordered by the
+	 *            indexes.
+	 */
+	private ArrayList<Object> attributes;
+
+	/**
+	 * Constructor initializes attributes
+	 */
+	public GuiSchema() {
+		this.attributes = new ArrayList<Object>();
+	}
+
+	/**
+	 * Adds an Attribute at the end of the Schema.
+	 * 
+	 * @param ob
+	 *            The Object to add as the next (last) attribute of the Schema.
+	 */
+	public void addAttribute(Object ob) {
+		this.attributes.add(ob);
+	}
+
+	/**
+	 * Return the ArrayList Object that defines the Schema.
+	 * 
+	 * @return returns the ArrayList of Objects that defines the Schema.
+	 */
+	public ArrayList<Object> getSchema() {
+		return this.attributes;
+	}
+
+	/**
+	 * Removes an Object from the Schema. Shifts all following attributes one to
+	 * the left.
+	 * 
+	 * @param ob
+	 *            The Object to remove from the Schema.
+	 */
+	public boolean removeAttribute(Object ob) {
+		try {
+			this.attributes.remove(ob);
+
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
+	}
+}

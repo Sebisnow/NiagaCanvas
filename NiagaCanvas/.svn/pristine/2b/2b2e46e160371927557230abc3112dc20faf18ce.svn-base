@@ -1,0 +1,40 @@
+package niagaCanvas;
+
+import jkanvas.nodelink.GraphView;
+
+/**
+ * Provides a view on a graph with enumerable edges and nodes.
+ * 
+ * @author Joschi <josua.krause@gmail.com>
+ * @param <NiagarinoOperators>
+ *            The position type.
+ */
+public interface NodeLinkView<NiagarinoOperators> extends GraphView {
+
+	/**
+	 * Getter.
+	 * 
+	 * @param index
+	 *            The id of the node.
+	 * @return The corresponding node.
+	 */
+	NiagarinoOperators getNode(int index);
+
+	/**
+	 * Getter.
+	 * 
+	 * @return The nodes in proper order.
+	 */
+	Iterable<NiagarinoOperators> nodes();
+
+	/**
+	 * Returns all edges from the given node. Note that when the graph is
+	 * undirected this contains only nodes with a higher id.
+	 * 
+	 * @param from
+	 *            The starting id.
+	 * @return All connected edges (with a higher id when undirected).
+	 */
+	Iterable<Integer> edgesFrom(int from);
+
+}

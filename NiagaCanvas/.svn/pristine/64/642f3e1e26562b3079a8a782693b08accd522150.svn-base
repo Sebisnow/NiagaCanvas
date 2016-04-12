@@ -1,0 +1,186 @@
+package niagaCanvas;
+
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
+
+public class SchemaWindow {
+
+	public String name;
+	private JFrame frame;
+
+	private EditorUI editor;
+	private JTextField attField;
+	private JButton button;
+
+	/**
+	 * Create the panel.
+	 */
+	public SchemaWindow(EditorUI editor) {
+		this.editor = editor;
+		this.button = new JButton("Start");
+		this.createSchemaWindow();
+
+	}
+
+	private void createSchemaWindow() {
+		// set up the frame and name field
+		this.setUp();
+
+		this.attributeField();
+		this.button.setFont(new Font("Dialog", Font.PLAIN, 15));
+		this.button.setPreferredSize(new Dimension(80, 80));
+
+		this.button.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				if (!editor.schema.isEmpty()) {
+					editor.schema.removeAll(editor.schema);
+				}
+				try {
+					parseString();
+
+					System.out.println(editor.schema);
+					// isSet = true;
+					frame.setVisible(false);
+
+				} catch (IllegalArgumentException except) {
+					JOptionPane.showMessageDialog(frame, "Please take " + "care that progressing is either 0 or 1!");
+				} catch (ArrayIndexOutOfBoundsException bounds) {
+					JOptionPane.showMessageDialog(frame,
+							"Please take care that you enter attributes " + "in the correct format!");
+
+				}
+
+			}
+		});
+
+		GridBagConstraints gbc_button = new GridBagConstraints();
+		gbc_button.anchor = GridBagConstraints.SOUTHEAST;
+		gbc_button.insets = new Insets(5, 5, 5, 5);
+		gbc_button.gridx = 1;
+		gbc_button.gridy = 2;
+		this.frame.getContentPane().add(this.button, gbc_button);
+
+		this.frame.pack();
+		this.frame.setVisible(true);
+		this.frame.setAlwaysOnTop(true);
+	}
+
+	protected void parseString() {
+		String[] attributes = new String[3];
+		String text = attField.getText();
+		if (!text.contains("Name:Type progressing")) {
+			String[] substrings = text.split(";");
+			for (String str : substrings) {
+				if (text.contains(":")) {
+					String[] sub = str.split(":");
+					attributes[0] = sub[0];
+					attributes[1] = sub[1].split(" ")[0];
+					int progressing = Integer.parseInt(sub[1].split(" ")[1]);
+					if (progressing == 0 || progressing == 1) {
+						attributes[2] = sub[1].split(" ")[1];
+					} else {
+						throw new IllegalArgumentException();
+					}
+					editor.schema.add(attributes);
+				}
+			}
+		}
+	}
+
+	private void attributeField() {
+
+		JLabel label = new JLabel();
+		label.setPreferredSize(new Dimension(150, 40));
+		label.setText("Schema of the plan: ");
+
+		GridBagConstraints gbc_label = new GridBagConstraints();
+		gbc_label.anchor = GridBagConstraints.NORTH;
+		gbc_label.fill = GridBagConstraints.HORIZONTAL;
+		gbc_label.insets = new Insets(5, 5, 5, 5);
+		gbc_label.gridx = 0;
+		gbc_label.gridy = 1;
+		this.frame.getContentPane().add(label, gbc_label);
+
+		this.attField = new JTextField();
+
+		String textEntry = "";
+		if (this.editor.schema.size() > 0) {
+			for (String[] attrList : this.editor.schema) {
+				textEntry = textEntry + attrList[0] + ":";
+				textEntry += attrList[1] + " ";
+				textEntry += attrList[2] + "; ";
+			}
+		} else {
+			textEntry = "Name:Type progressing";
+		}
+
+		attField.setText(textEntry);
+		attField.setEditable(true);
+		attField.setPreferredSize(new Dimension(200, 40));
+		attField.setToolTipText("Please enter like: 'Name:Type progressing'"
+				+ " where Name is a String, Type is int or double and progressing is 0 for false and 1 for true"
+				+ "End attribute with semicolon.");
+
+		GridBagConstraints text = new GridBagConstraints();
+		text.anchor = GridBagConstraints.NORTH;
+		text.fill = GridBagConstraints.HORIZONTAL;
+		text.insets = new Insets(5, 5, 5, 5);
+		text.gridx = 1;
+		text.gridy = 1;
+		this.frame.getContentPane().add(attField, text);
+
+	}
+
+	private void setUp() {
+		this.frame = new JFrame("Startup Options");
+		this.frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		this.frame.setPreferredSize(new Dimension(600, 280));
+
+		GridBagLayout gridBagLayout = new GridBagLayout();
+		gridBagLayout.columnWidths = new int[] { 100, 400, 0, 0 };
+		gridBagLayout.rowHeights = new int[] { 80, 80, 80, 80 };
+		gridBagLayout.columnWeights = new double[] { 0.0, 0.0, 0.0, Double.MIN_VALUE };
+		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, Double.MIN_VALUE };
+
+		this.frame.getContentPane().setLayout(gridBagLayout);
+
+		JTextField textField = new JTextField();
+		textField.setEditable(true);
+		textField.setPreferredSize(new Dimension(200, 40));
+		textField.setName("Name");
+
+		GridBagConstraints text = new GridBagConstraints();
+		text.anchor = GridBagConstraints.BASELINE;
+		text.fill = GridBagConstraints.HORIZONTAL;
+		text.insets = new Insets(5, 5, 5, 5);
+		text.gridx = 1;
+		text.gridy = 0;
+		this.frame.getContentPane().add(textField, text);
+
+		JLabel label = new JLabel();
+		label.setPreferredSize(new Dimension(150, 40));
+		label.setText("Name of the Plan: ");
+
+		GridBagConstraints gbc_label = new GridBagConstraints();
+		gbc_label.anchor = GridBagConstraints.NORTH;
+		gbc_label.fill = GridBagConstraints.HORIZONTAL;
+		gbc_label.insets = new Insets(0, 0, 5, 5);
+		gbc_label.gridx = 0;
+		gbc_label.gridy = 0;
+		this.frame.getContentPane().add(label, gbc_label);
+	}
+}

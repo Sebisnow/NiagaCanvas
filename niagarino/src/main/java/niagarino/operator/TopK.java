@@ -1,0 +1,168 @@
+/*
+ * @(#)TopK.java   1.0   Jul 9, 2015
+ *
+ * Copyright (c) 2011-2012 Portland State University.
+ * Copyright (c) 2013-2015 University of Konstanz.
+ *
+ * This software is the proprietary information of the above-mentioned institutions.
+ * Use is subject to license terms. Please refer to the included copyright notice.
+ */
+package niagarino.operator;
+
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
+import niagarino.stream.ControlTuple;
+import niagarino.stream.DataTuple;
+import niagarino.stream.PunctuationControl;
+import niagarino.stream.Schema;
+import niagarino.stream.Stream.Flow;
+import niagarino.stream.TopKStreamSegment;
+import niagarino.util.TypeSystem;
+
+/**
+ * Operator to answer top-k queries, currently only the top-k MAX tuples are calculated. This class is derived
+ * directly from {@code OrderedAggregate}.
+ *
+ * @author Manuel Hotz &lt;manuel.hotz@uni-konstanz.de&gt
+ */
+public class TopK extends AbstractOperator {
+
+   /** The k parameter. */
+   private final int k;
+   /** The attribute position of the attribute used for the preference function. */
+   private final int attributePosition;
+
+   /** Segments for which top-k elements are currently aggregated. */
+   private final SortedMap<Long, TopKStreamSegment> segments;
+
+   /** Currently open segments. */
+   private final Set<Long> openSegments;
+
+   /** The last punctuation control we saw. */
+   private PunctuationControl lastPunctuation;
+
+   /**
+    * Constructs a new top-k operator for ordered streams.
+    *
+    * @param operatorId
+    *           operator id
+    * @param inputSchema
+    *           input schema
+    * @param k
+    *           how many tuples to report
+    * @param attributePosition
+    *           which attribute to inspect for ordering
+    */
+   public TopK(final String operatorId, final Schema inputSchema, final int k, final int attributePosition) {
+      super(operatorId, Arrays.asList(inputSchema));
+      this.k = k;
+      this.attributePosition = attributePosition;
+      this.segments = new TreeMap<Long, TopKStreamSegment>();
+      this.openSegments = new HashSet<Long>();
+   }
+
+   @Override
+   public Schema getOutputSchema() {
+      // we do not mutate the schema, just select tuples based on a group
+      return getInputSchemas().get(0);
+   }
+
+   @Override
+   protected void processTuple(final int input, final DataTuple tuple) {
+      final List<Long> currSegments = tuple.getElementMetadata().getSegmentIds();
+      this.openSegments.addAll(currSegments);
+
+      currSegments.forEach(segmentId -> this.segments.computeIfAbsent(segmentId,
+            (final Long l) -> new TopKStreamSegment(this.getOutputSchema(), this.k, this.attributePosition))
+            .insertTuple(tuple));
+   }
+
+   @Override
+   protected void processForwardControl(final int input, final ControlTuple message) {
+      switch (message.getType()) {
+         case PUNCTUATION:
+            final PunctuationControl ctrl = (PunctuationControl) message;
+            if (PunctuationControl.Type.WINDOW.equals(ctrl.getPunctuationType())) {
+               this.lastPunctuation = ctrl;
+               this.reportSegment(ctrl.getSegmentId());
+               this.openSegments.remove(ctrl.getSegmentId());
+            }
+            break;
+         default:
+            break;
+      }
+      this.pushControl(Flow.FORWARD, message);
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   @Override
+   protected void handleEoS(final Socket socket, final int input, final ControlTuple message) {
+      if (Socket.INPUT.equals(socket)) {
+         while (!this.segments.isEmpty()) {
+            this.reportSegment(this.segments.firstKey());
+         }
+      }
+      super.handleEoS(socket, input, message);
+   }
+
+   /**
+    * Reports the tuples of the given segment.
+    *
+    * @param segmentId
+    *           the segment to report tuples of
+    */
+   private void reportSegment(final Long segmentId) {
+      final TopKStreamSegment segment = this.segments.get(segmentId);
+      if (segment == null) {
+         throw new IllegalArgumentException("Unknown segment for segment id " + segmentId);
+      }
+
+      this.advanceProgressingAttributeBoundaries(segmentId, segment);
+
+      // tuples are already sorted and of cardinality k
+      final List<DataTuple> tuples = segment.reportTuples();
+
+      // p-p-p-push the tuple (without adding the same segment id again)
+      for (final DataTuple t : tuples) {
+         this.pushTuple(t);
+      }
+      this.segments.remove(segmentId);
+   }
+
+   /**
+    * Advances the boundaries of the progressing attribute if we saw a punctuation already, otherwise this
+    * operation is a no-op.
+    *
+    * @param segmentId
+    *           the current segment id
+    * @param segment
+    *           the segment corresponding to the segment id
+    */
+   private void advanceProgressingAttributeBoundaries(final Long segmentId, final TopKStreamSegment segment) {
+      if (this.lastPunctuation != null) {
+         final long difference = (segmentId - this.lastPunctuation.getSegmentId())
+               * this.lastPunctuation.getStepSize();
+         final Object min;
+         final Object max;
+         final Schema s = this.getOutputSchema();
+         final Class< ? > progAttrClass = s.getAttribute(s.getProgressingAttribute()).getType();
+         if (Date.class.equals(progAttrClass)) {
+            min = new Date(this.lastPunctuation.getSegmentStart() + difference);
+            max = new Date(this.lastPunctuation.getSegmentEnd() + difference);
+         } else {
+            min = TypeSystem
+                  .convertNumber(progAttrClass, this.lastPunctuation.getSegmentStart() + difference);
+            max = TypeSystem.convertNumber(progAttrClass, this.lastPunctuation.getSegmentEnd() + difference);
+         }
+         segment.setMinMax(min, max);
+      }
+   }
+}

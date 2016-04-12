@@ -1,0 +1,442 @@
+package niagaCanvas;
+
+import java.awt.Button;
+import java.awt.Component;
+import java.awt.ComponentOrientation;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Map;
+import java.util.Set;
+
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+
+import org.reflections.Reflections;
+
+import niagacanvas.operator.AbstractOperator;
+import niagacanvas.operator.GetParams;
+import niagacanvas.operator.OperatorAnnotation;
+import niagacanvas.operator.ParamDescription;
+
+@SuppressWarnings("serial")
+public class OptionWindow extends JFrame {
+	public boolean isSet;
+	public String name;
+	private JTextField textField;
+	private final NiagarinoOperators op;
+	private Map<String, String> option;
+
+	/**
+	 * Create the panel for Stream.
+	 * 
+	 */
+	public OptionWindow(JFrame frame, Stream operator) {
+		this.op = operator;
+		this.getContentPane().setPreferredSize(new Dimension(400, 200));
+		this.setTitle("Manage Options of the Stream: " + this.op.name);
+		isSet = false;
+		setPreferredSize(new Dimension(400, 200));
+		setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
+		GridBagLayout gridBagLayout = new GridBagLayout();
+		gridBagLayout.columnWidths = new int[] { 90, 90, 90, 90 };
+		gridBagLayout.rowHeights = new int[] { 50, 50, 50, 50, 50 };
+		gridBagLayout.columnWeights = new double[] { 1.0, 1.0, 0.0, Double.MIN_VALUE };
+		gridBagLayout.rowWeights = new double[] { 1.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+
+		getContentPane().setLayout(gridBagLayout);
+
+		JLabel lblName = new JLabel("Name:");
+		GridBagConstraints gbc_lblName = new GridBagConstraints();
+		gbc_lblName.insets = new Insets(0, 0, 5, 5);
+		gbc_lblName.anchor = GridBagConstraints.EAST;
+		gbc_lblName.gridx = 0;
+		gbc_lblName.gridy = 1;
+		getContentPane().add(lblName, gbc_lblName);
+
+		textField = new JTextField();
+		GridBagConstraints gbc_textField = new GridBagConstraints();
+		gbc_textField.insets = new Insets(0, 0, 5, 5);
+		gbc_textField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_textField.gridx = 1;
+		gbc_textField.gridy = 1;
+		getContentPane().add(textField, gbc_textField);
+		textField.setColumns(10);
+
+		JLabel lblOperatorType = new JLabel("Operator Type");
+		GridBagConstraints gbc_lblOperatorType = new GridBagConstraints();
+		gbc_lblOperatorType.insets = new Insets(0, 0, 5, 5);
+		gbc_lblOperatorType.gridx = 0;
+		gbc_lblOperatorType.gridy = 2;
+		getContentPane().add(lblOperatorType, gbc_lblOperatorType);
+
+		Button button = new Button("Create");
+		button.setSize(new Dimension(80, 80));
+		button.setFont(new Font("Dialog", Font.PLAIN, 15));
+		button.setPreferredSize(new Dimension(80, 80));
+
+		button.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				op.name = textField.getText();
+
+				isSet = true;
+				setVisible(false);
+			}
+		});
+		GridBagConstraints gbc_button = new GridBagConstraints();
+		gbc_button.insets = new Insets(0, 0, 0, 5);
+		gbc_button.anchor = GridBagConstraints.NORTH;
+		gbc_button.gridx = 1;
+		gbc_button.gridy = 3;
+		this.getContentPane().add(button, gbc_button);
+
+		this.pack();
+		this.setVisible(true);
+
+	}
+
+	/**
+	 * Create the panel for Operators.
+	 * 
+	 * 
+	 */
+	public OptionWindow(JFrame frame, Operator operator) {
+		this.op = (Operator) operator;
+		if (((Operator) this.op).modified == true) {
+
+		}
+		this.getContentPane().setPreferredSize(new Dimension(400, 200));
+		this.setTitle("Manage Options of the Operator: " + this.op.name);
+		isSet = false;
+		setPreferredSize(new Dimension(600, 400));
+		setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
+		GridBagLayout gridBagLayout = new GridBagLayout();
+		gridBagLayout.columnWidths = new int[] { 100, 110, 90, 10 };
+		gridBagLayout.rowHeights = new int[] { 35, 46, 55, 0, 10 };
+
+		gridBagLayout.columnWeights = new double[] { 1.0, 1.0, 0.0, Double.MIN_VALUE };
+		gridBagLayout.rowWeights = new double[] { 1.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+		getContentPane().setLayout(gridBagLayout);
+
+		JLabel lblName = new JLabel("Change Name To:");
+		lblName.setName("Name");
+		GridBagConstraints gbc_lblName = new GridBagConstraints();
+		gbc_lblName.insets = new Insets(0, 0, 5, 5);
+		gbc_lblName.anchor = GridBagConstraints.EAST;
+		gbc_lblName.gridx = 0;
+		gbc_lblName.gridy = 0;
+		getContentPane().add(lblName, gbc_lblName);
+
+		Button button = new Button("Create");
+		button.setName("create");
+		button.setSize(new Dimension(80, 80));
+		button.setFont(new Font("Dialog", Font.PLAIN, 15));
+		button.setPreferredSize(new Dimension(80, 80));
+
+		button.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				op.name = textField.getText();
+
+				isSet = true;
+				setVisible(false);
+			}
+		});
+
+		textField = new JTextField();
+		textField.setName("Name");
+		GridBagConstraints gbc_textField = new GridBagConstraints();
+		gbc_textField.insets = new Insets(0, 0, 5, 5);
+		gbc_textField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_textField.gridx = 1;
+		gbc_textField.gridy = 0;
+		getContentPane().add(textField, gbc_textField);
+		textField.setColumns(1);
+
+		JLabel lblOperatorType = new JLabel("Operator Type");
+		lblOperatorType.setName("Name");
+		GridBagConstraints gbc_lblOperatorType = new GridBagConstraints();
+		gbc_lblOperatorType.anchor = GridBagConstraints.EAST;
+		gbc_lblOperatorType.insets = new Insets(0, 0, 5, 5);
+		gbc_lblOperatorType.gridx = 0;
+		gbc_lblOperatorType.gridy = 1;
+		getContentPane().add(lblOperatorType, gbc_lblOperatorType);
+
+		JComboBox<String> comboBox = new JComboBox<String>();
+		comboBox.setName("Name");
+		comboBox.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (!e.getItem().equals("")) {
+					((Operator) op).properties.put("OperatorType", (String) e.getItem());
+					redrawOperator((String) e.getItem());
+
+				}
+			}
+		});
+		comboBox.addItem("");
+		String opType = ((Operator) op).properties.get("OperatorType");
+		Reflections reflections = new Reflections("niagacanvas.operator");
+		// Set<Class<? extends AbstractOperator>> classes =
+		// reflections.getSubTypesOf(AbstractOperator.class);
+		// comboBox.addItem("");
+		// for (Class<? extends AbstractOperator> cl : classes) {
+		// comboBox.addItem(cl.getCanonicalName().substring(19));
+		//
+		// }
+		// sets the standard selection to the Operator Type of the operator if
+		// already given
+		Set<Class<?>> classes = reflections.getTypesAnnotatedWith(OperatorAnnotation.class);
+		for (Class<?> cl : classes) {
+			comboBox.addItem(cl.getCanonicalName().substring(19));
+		}
+		comboBox.setSelectedItem(opType);
+
+		GridBagConstraints gbc_comboBox = new GridBagConstraints();
+		gbc_comboBox.insets = new Insets(0, 0, 5, 5);
+		gbc_comboBox.fill = GridBagConstraints.HORIZONTAL;
+		gbc_comboBox.gridx = 1;
+		gbc_comboBox.gridy = 1;
+		getContentPane().add(comboBox, gbc_comboBox);
+
+		GridBagConstraints gbc_button = new GridBagConstraints();
+		gbc_button.insets = new Insets(0, 0, 0, 5);
+		gbc_button.anchor = GridBagConstraints.NORTH;
+		gbc_button.gridx = 1;
+		gbc_button.gridy = getContentPane().getComponentCount() + 1;
+		getContentPane().add(button, gbc_button);
+
+		this.pack();
+		this.setVisible(true);
+
+	}
+
+	private void redrawOperator(String opName) {
+		Operator operator = (Operator) this.op;
+		Button button = null;
+
+		System.out.println(this.getContentPane().getComponents().length);
+		for (Component c : this.getContentPane().getComponents()) {
+
+			// && c.getName().equals("create")
+			if (c instanceof Button) {
+				button = (Button) c;
+				this.getContentPane().remove(c);
+
+				// System.out.println("Button was removed and recreated");
+			} else if (c.getName() != null && c.getName().equals("Name")) {
+
+				continue;
+
+			} else {
+				this.getContentPane().remove(c);
+			}
+		}
+		if (button != null) {
+			button.setName("create");
+		}
+		// Field[] fields = new Field[20];
+		// Set<Class<? extends AbstractOperator>> classes =
+		// reflections.getSubTypesOf(AbstractOperator.class);
+
+		// for (Class<? extends AbstractOperator> cl : classes) {
+		// if (cl.getCanonicalName().substring(19).equals(opName)) {
+		//
+		// fields = new Field[cl.getDeclaredFields().length];
+		// fields = cl.getDeclaredFields();
+		// }
+		// }
+		ParamDescription[] param = new ParamDescription[1];
+		Class<? extends AbstractOperator> operatorClass;
+		for (Class<? extends AbstractOperator> cl : getAbsOperator()) {
+			if (cl.getCanonicalName().substring(19).equals(opName)) {
+
+				try {
+					param = (ParamDescription[]) this.getParamMethod(cl).invoke(null);
+
+				} catch (IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalArgumentException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InvocationTargetException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				operatorClass = cl;
+
+			}
+		}
+		int cnt = 3;
+		for (ParamDescription field : param) {
+			JLabel label = new JLabel(
+					field.getName() + " - " + ParamDescription.TYPES.get(field.getValueRange()) + ": ");
+			GridBagConstraints gbc_label = new GridBagConstraints();
+			gbc_label.insets = new Insets(0, 0, 5, 5);
+			gbc_label.gridx = 0;
+			gbc_label.gridy = cnt;
+			gbc_label.anchor = GridBagConstraints.EAST;
+			getContentPane().add(label, gbc_label);
+
+			switch (field.getValueRange()) {
+			case ParamDescription.STRING:
+				JTextField text = new JTextField(field.getName());
+				text.setEditable(true);
+				text.setToolTipText(field.getDescription());
+
+				GridBagConstraints gbc_text = new GridBagConstraints();
+				gbc_text.insets = new Insets(0, 0, 5, 5);
+				gbc_text.fill = GridBagConstraints.HORIZONTAL;
+				gbc_text.gridx = 1;
+				gbc_text.gridy = cnt;
+				getContentPane().add(text, gbc_text);
+				cnt++;
+				break;
+			case ParamDescription.INT:
+				JTextField text1 = new JTextField(field.getName());
+
+				text1.setEditable(true);
+				text1.setToolTipText(field.getDescription());
+
+				GridBagConstraints gbc_text1 = new GridBagConstraints();
+				gbc_text1.insets = new Insets(0, 0, 5, 5);
+				gbc_text1.fill = GridBagConstraints.HORIZONTAL;
+				gbc_text1.gridx = 1;
+				gbc_text1.gridy = cnt;
+				getContentPane().add(text1, gbc_text1);
+				cnt++;
+
+				break;
+			case ParamDescription.BOOLEAN:
+				JComboBox<String> box = new JComboBox<String>();
+				box.addItem("true");
+				box.addItem("false");
+				box.addItemListener(new ItemListener() {
+
+					@Override
+					public void itemStateChanged(ItemEvent e) {
+						if (e.getStateChange() == ItemEvent.SELECTED)
+							operator.properties.put(field.getName(), (String) e.getItem());
+
+					}
+
+				});
+				cnt++;
+
+				break;
+			case ParamDescription.DOUBLE:
+
+				break;
+			case ParamDescription.LONG:
+
+				break;
+			case ParamDescription.PREDICATE:
+				JTextField text2 = new JTextField(field.getName());
+
+				text2.setEditable(true);
+				text2.setToolTipText(field.getDescription());
+
+				GridBagConstraints gbc_text2 = new GridBagConstraints();
+				gbc_text2.insets = new Insets(0, 0, 5, 5);
+				gbc_text2.fill = GridBagConstraints.HORIZONTAL;
+				gbc_text2.gridx = 1;
+				gbc_text2.gridy = cnt;
+				getContentPane().add(text2, gbc_text2);
+				cnt++;
+
+				break;
+			case ParamDescription.GROUP:
+
+				break;
+			case ParamDescription.AGGREGATIONFUNCTION:
+
+				break;
+			case ParamDescription.STRINGFUNCTION:
+
+				break;
+
+			default:
+				break;
+			}
+
+		}
+		if (button != null) {
+			GridBagConstraints gbc_button = new GridBagConstraints();
+			gbc_button.insets = new Insets(0, 0, 0, 5);
+			gbc_button.anchor = GridBagConstraints.NORTH;
+			gbc_button.gridx = 1;
+			gbc_button.gridy = cnt;
+			getContentPane().add(button, gbc_button);
+		}
+		this.pack();
+		this.validate();
+		this.repaint();
+	}
+
+	private Method getParamMethod(Class<? extends AbstractOperator> cl) {
+		Method meth = null;
+		for (final Method method : cl.getDeclaredMethods()) {
+			if (!Modifier.isPublic(method.getModifiers()) || !Modifier.isStatic(method.getModifiers())) {
+				// skip non-static methods
+				continue;
+			}
+
+			if (method.isAnnotationPresent(GetParams.class)) {
+				meth = method;
+			}
+		}
+
+		return meth;
+	}
+
+	private Set<Class<? extends AbstractOperator>> getAbsOperator() {
+		Reflections reflections = new Reflections("niagacanvas.operator");
+
+		Set<Class<?>> classes = reflections.getTypesAnnotatedWith(OperatorAnnotation.class);
+		Set<Class<? extends AbstractOperator>> operatorClasses = reflections.getSubTypesOf(AbstractOperator.class);
+		for (Class<? extends AbstractOperator> abOp : operatorClasses) {
+			boolean exists = false;
+			for (Class<?> cl : classes) {
+				if (cl.equals(abOp)) {
+					exists = true;
+				}
+			}
+
+			if (!exists) {
+				operatorClasses.remove(abOp);
+			}
+		}
+		return operatorClasses;
+	}
+
+	public String getSchemaName() {
+		// while (true) {
+		// if (this.isSet) {
+		// return this.name;
+		// }
+		// }
+		// run loop as long as no name is set for the Niagarino file
+		// TODO does not run if nothing is printed out...
+		while (!isSet) {
+			System.out.println(isSet);
+			continue;
+		}
+
+		return this.name;
+	}
+}

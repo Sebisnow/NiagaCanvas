@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xsd:schema
+  jxb:version="1.0"
+  xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+  <xsd:include schemaLocation="niagarino.operators.xsd" />
+
+  <xsd:element name="plan">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="schema" type="typeListType" minOccurs="1" maxOccurs="unbounded" />
+        <xsd:element name="stream" type="streamType" minOccurs="1" maxOccurs="unbounded" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="c" type="xsd:string" />
+
+  <xsd:complexType name="typeListType">
+    <xsd:sequence>
+      <xsd:choice minOccurs="1" maxOccurs="unbounded">
+        <xsd:element name="int" type="valueTypeType" />
+        <xsd:element name="double" type="valueTypeType" />
+        <xsd:element name="string" type="valueTypeType" />
+      </xsd:choice>
+    </xsd:sequence>
+    <xsd:attribute name="name" type="xsd:string" use="required" />
+  </xsd:complexType>
+  <xsd:complexType name="valueTypeType">
+    <xsd:attribute name="name" type="xsd:string" use="required" />
+    <xsd:attribute name="progressing" type="xsd:boolean" use="optional" />
+  </xsd:complexType>
+
+  <xsd:complexType name="streamType">
+    <xsd:choice minOccurs="1" maxOccurs="unbounded">
+      <xsd:element name="operator" type="genericOperatorType" />
+<!--      <xsd:element name="aggregate" type="aggregateOperatorType" />
+      <xsd:element name="multiplex" type="multiplexOperatorType" />
+      <xsd:element name="print" type="printOperatorType" />
+      <xsd:element name="scan" type="scanOperatorType" />
+      <xsd:element name="selection" type="selectionOperatorType" />
+      <xsd:element name="window" type="windowOperatorType" />
+-->    </xsd:choice>
+    <xsd:attribute name="name" type="xsd:string" use="required" />
+    <xsd:attribute name="previous" type="xsd:string" />
+  </xsd:complexType>
+
+  <xsd:complexType name="operatorType" abstract="true">
+    <xsd:attribute name="name" type="xsd:string" />
+  </xsd:complexType>
+
+  <xsd:complexType name="genericOperatorType">
+    <xsd:complexContent>
+      <xsd:extension base="operatorType">
+        <xsd:sequence>
+          <xsd:choice minOccurs="0" maxOccurs="unbounded">
+            <xsd:any processContents="skip" />
+          </xsd:choice>
+        </xsd:sequence>
+        <xsd:attribute name="class" type="xsd:string" />
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+
+  <xsd:complexType name="schemaSpecType">
+    <xsd:attribute name="name" type="xsd:string" />
+  </xsd:complexType>
+
+  <xsd:complexType name="fileSpecType">
+    <xsd:attribute name="uri" type="xsd:string" />
+  </xsd:complexType>
+
+  <xsd:complexType name="attributeSpecType">
+    <xsd:attribute name="name" type="xsd:string" />
+  </xsd:complexType>
+
+  <xsd:complexType name="aggregateFunctionSpecType">
+    <xsd:attribute name="attribute" type="xsd:string" />
+  </xsd:complexType>
+
+  <xsd:complexType name="comparisonSpecType" abstract="true">
+    <xsd:attribute name="attribute" type="xsd:string" />
+  </xsd:complexType>
+
+  <xsd:complexType name="equalsComparisonSpecType">
+    <xsd:complexContent>
+      <xsd:extension base="comparisonSpecType">
+        <xsd:attribute name="value" type="xsd:anySimpleType" />
+        <xsd:attribute name="type">
+          <xsd:simpleType>
+            <xsd:restriction base="xsd:string">
+              <xsd:enumeration value="number" />
+              <xsd:enumeration value="string" />
+              <xsd:enumeration value="boolean" />
+              <xsd:enumeration value="object" />
+            </xsd:restriction>
+          </xsd:simpleType>
+        </xsd:attribute>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+
+  <xsd:complexType name="rangeComparisonSpecType">
+    <xsd:complexContent>
+      <xsd:extension base="comparisonSpecType">
+        <xsd:attribute name="lower" type="xsd:anySimpleType" />
+        <xsd:attribute name="upper" type="xsd:anySimpleType" />
+        <xsd:attribute name="type">
+          <xsd:simpleType>
+            <xsd:restriction base="xsd:string">
+              <xsd:enumeration value="number" />
+              <xsd:enumeration value="string" />
+              <xsd:enumeration value="object" />
+            </xsd:restriction>
+          </xsd:simpleType>
+        </xsd:attribute>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+</xsd:schema>

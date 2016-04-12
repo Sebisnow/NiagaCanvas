@@ -1,0 +1,347 @@
+package niagaCanvas;
+
+import java.awt.AlphaComposite;
+import java.awt.Graphics2D;
+import java.awt.Shape;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.awt.geom.RectangularShape;
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.Objects;
+import java.util.Set;
+
+import jkanvas.KanvasContext;
+import jkanvas.animation.AnimatedPosition;
+import jkanvas.animation.AnimationList;
+import jkanvas.nodelink.EdgeRealizer;
+import jkanvas.nodelink.NodeLinkView;
+import jkanvas.nodelink.NodeRealizer;
+import jkanvas.nodelink.layout.LayoutedView;
+import jkanvas.painter.Renderpass;
+
+/**
+ * Paints a layouted node-link diagram.
+ * 
+ * @author Sebastian
+ * @param <T>
+ *            The type of nodes.
+ */
+public class DefaultNodeLinkRenderpass<T extends AnimatedPosition> extends Renderpass {
+
+	/** The bounding box. */
+	private final Rectangle2D bbox;
+
+	/** The layout view if any. */
+	private final LayoutedView<T> layout;
+
+	/** The view on the graph. */
+	protected final NodeLinkView<T> view;
+
+	/** The node realizer. */
+	private NodeRealizer<T> nodeRealizer;
+	/** The node realizer. */
+
+	/** The edge realizer. */
+	private EdgeRealizer<T> edgeRealizer;
+
+	/** The animation list. */
+	private AnimationList list;
+
+	/**
+	 * Creates a node-link painter.
+	 * 
+	 * @param view
+	 *            The view on the graph.
+	 */
+	public DefaultNodeLinkRenderpass(final LayoutedView<T> view) {
+		this.view = Objects.requireNonNull(view);
+		layout = view;
+		bbox = null;
+	}
+
+	/**
+	 * Creates a node-link painter.
+	 * 
+	 * @param view
+	 *            The view on the graph.
+	 * @param bbox
+	 *            The bounding box of the render pass.
+	 */
+	public DefaultNodeLinkRenderpass(final NodeLinkView<T> view, final Rectangle2D bbox) {
+		this.view = Objects.requireNonNull(view);
+		this.bbox = Objects.requireNonNull(bbox);
+		layout = null;
+	}
+
+	/**
+	 * Setter.
+	 * 
+	 * @param edgeRealizer
+	 *            The edge realizer.
+	 */
+	public void setEdgeRealizer(final EdgeRealizer<T> edgeRealizer) {
+		this.edgeRealizer = Objects.requireNonNull(edgeRealizer);
+	}
+
+	/**
+	 * Getter.
+	 * 
+	 * @return The current edge realizer.
+	 */
+	public EdgeRealizer<T> getEdgeRealizer() {
+		return edgeRealizer;
+	}
+
+	/**
+	 * Setter.
+	 * 
+	 * @param nodeRealizer
+	 *            The node realizer.
+	 */
+	public void setNodeRealizer(final NodeRealizer<T> nodeRealizer) {
+		this.nodeRealizer = Objects.requireNonNull(nodeRealizer);
+	}
+
+	/**
+	 * Getter.
+	 * 
+	 * @return The current node realizer.
+	 */
+	public NodeRealizer<T> getNodeRealizer() {
+		return nodeRealizer;
+	}
+
+	@Override
+	public void draw(final Graphics2D gfx, final KanvasContext ctx) {
+		renderEdges(gfx, ctx);
+		renderNodes(gfx, ctx);
+	}
+
+	/** The node set. This set is used to detect whether a node is new. */
+	private final Set<T> lastNodes = Collections.newSetFromMap(new IdentityHashMap<T, Boolean>());
+
+	/**
+	 * Renders all nodes and differentiates between Streams and Operators.
+	 * 
+	 * @param gfx
+	 *            The graphics context.
+	 * @param ctx
+	 *            The canvas context.
+	 */
+	private void renderNodes(final Graphics2D gfx, final KanvasContext ctx) {
+		final Rectangle2D visible = ctx.getVisibleCanvas();
+		final NodeRealizer<T> streamRealizer = new RectangularNodeRealizer<T>();
+		final NodeRealizer<T> operatorRealizer = new DefaultNodeRealizer<T>();
+		int count = 0;
+		for (final T node : view.nodes()) {
+			++count;
+			// automatically adds new nodes to the animation list
+			// this needs only to be done in the draw method
+			if (!lastNodes.contains(node)) {
+				list.addAnimated(node);
+				lastNodes.add(node);
+			}
+			final double x = node.getX();
+			final double y = node.getY();
+			if (node instanceof Stream) {
+				final Shape nodeShape = streamRealizer.createNodeShape(node, x, y);
+				if (!nodeShape.intersects(visible)) {
+					continue;
+				}
+				final Graphics2D g = (Graphics2D) gfx.create();
+
+				g.setComposite(AlphaComposite.getInstance(10, 0.5f));
+				streamRealizer.drawNode(g, node);
+				g.dispose();
+			} else if (node instanceof Operator) {
+				final Shape nodeShape = operatorRealizer.createNodeShape(node, x, y);
+				if (!nodeShape.intersects(visible)) {
+					continue;
+				}
+				final Graphics2D g = (Graphics2D) gfx.create();
+
+				g.setComposite(AlphaComposite.getInstance(2, 1.0f));
+				operatorRealizer.drawNode(g, node);
+
+				g.dispose();
+			}
+			// else {
+			// final Shape nodeShape = streamRealizer.createNodeShape(node, x,
+			// y);
+			// if (!nodeShape.intersects(visible)) {
+			// continue;
+			// }
+			// final Graphics2D g = (Graphics2D) gfx.create();
+			// nodeRealizer.drawNode(g, node);
+			// g.dispose();
+			// }
+		}
+		if (count < lastNodes.size()) {
+			// clear set when nodes got removed
+			lastNodes.clear();
+		}
+	}
+
+	/**
+	 * Small helper method to convert doubles to ints.
+	 * 
+	 * @param x
+	 *            the double value to convert to an integer.
+	 * @return the integer value of x.
+	 */
+	@SuppressWarnings("unused")
+	private int getInt(double x) {
+		return (int) x;
+	}
+
+	/**
+	 * Renders all edges.
+	 * 
+	 * @param gfx
+	 *            The graphics context.
+	 * @param ctx
+	 *            The canvas context.
+	 */
+	private void renderEdges(final Graphics2D gfx, final KanvasContext ctx) {
+		final Rectangle2D visible = ctx.getVisibleCanvas();
+		final EdgeRealizer<T> edgeRealizer = getEdgeRealizer();
+		for (int i = 0; i < view.nodeCount(); ++i) {
+			final T from = view.getNode(i);
+			for (final int toId : view.edgesFrom(i)) {
+
+				/*
+				 * TODO There is an issue here with directed edges if you remove
+				 * the node that is the target an error is thrown. Maybe there
+				 * is a check too much. Correct in SimpleNodeLinkView.
+				 */
+
+				final T to = view.getNode(toId);
+				final Shape edgeShape = edgeRealizer.createLineShape(from, to);
+
+				if (!edgeShape.intersects(visible)) {
+					continue;
+				}
+				final Graphics2D g = (Graphics2D) gfx.create();
+				g.setComposite(AlphaComposite.getInstance(2, 0.8f));
+				edgeRealizer.drawLines(g, edgeShape, from, to);
+				g.dispose();
+			}
+		}
+	}
+
+	/**
+	 * Finds a node at the given position.
+	 * 
+	 * @param pos
+	 *            The position.
+	 * @return The node or <code>null</code> if there is no node at the given
+	 *         position.
+	 */
+	public T pick(final Point2D pos) {
+		final NodeRealizer<T> nodeRealizer = getNodeRealizer();
+		T cur = null;
+		for (final T node : view.nodes()) {
+			final double x = node.getX();
+			final double y = node.getY();
+			final Shape shape = nodeRealizer.createNodeShape(node, x, y);
+			if (shape.contains(pos)) {
+				// return the last match -- ie topmost node
+				cur = node;
+			}
+		}
+		return cur;
+	}
+
+	/**
+	 * Finds a submerged node at the given position, if no node is underneath
+	 * another the only node is returned or null if there is non at all.
+	 * 
+	 * @param pos
+	 *            The position.
+	 * @return The node or <code>null</code> if there is no node at the given
+	 *         position.
+	 */
+	@SuppressWarnings("unused")
+	public T pickSub(final Point2D pos) {
+		final NodeRealizer<T> nodeRealizer = getNodeRealizer();
+		T cur = null;
+		T last = null;
+		for (final T node : view.nodes()) {
+			final double x = node.getX();
+			final double y = node.getY();
+			final Shape shape = nodeRealizer.createNodeShape(node, x, y);
+			if (shape.contains(pos)) {
+				// return the last match -- ie topmost node
+				if (last != null) {
+					last = node;
+				}
+				cur = node;
+			}
+		}
+		return last;
+	}
+
+	/**
+	 * draw shape around the position and check whether that shape intersects
+	 * the shape of another node
+	 * 
+	 * @param pos
+	 *            The position.
+	 * @return The node or <code>null</code> if there is no node at the given
+	 *         position.
+	 */
+	@SuppressWarnings("unused")
+	public T pickShape(final Point2D pos) {
+		final NodeRealizer<T> nodeRealizer = getNodeRealizer();
+		final Shape shapeNode = nodeRealizer.createNodeShape(pick(pos), pos.getX(), pos.getY());
+
+		T cur = null;
+		T last = null;
+		for (final T node : view.nodes()) {
+			final Shape shape = nodeRealizer.createNodeShape(node, node.getX(), node.getY());
+			if (shape.intersects(shapeNode.getBounds2D())) {
+				// return the first match -- ie bottommost node
+				if (last == null) {
+					last = node;
+				}
+				cur = node;
+			}
+		}
+
+		return last;
+	}
+
+	@Override
+	public void setAnimationList(final AnimationList list) {
+		this.list = Objects.requireNonNull(list);
+	}
+
+	/**
+	 * Getter.
+	 * 
+	 * @return The animation list.
+	 */
+	protected AnimationList getAnimationList() {
+		return list;
+	}
+
+	@Override
+	public boolean isChanging() {
+		for (final T node : view.nodes()) {
+			if (node.inAnimation())
+				return true;
+		}
+		return false;
+	}
+
+	@Override
+	public void getBoundingBox(final RectangularShape rect) {
+		if (layout == null) {
+			rect.setFrame(bbox);
+		} else {
+			layout.getBoundingBox(rect);
+		}
+	}
+
+}

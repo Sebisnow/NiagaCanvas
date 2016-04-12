@@ -1,0 +1,302 @@
+package niagaCanvas;
+
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import jkanvas.util.BitSetIterable;
+
+/**
+ * Creates a simple view on a graph. Nodes can only be added. Saves all nodes.
+ *
+ * @author Joschi <josua.krause@gmail.com>
+ * @param <NiagarinoOperators>
+ *            The position type.
+ * @param <T>
+ */
+@SuppressWarnings("hiding")
+public class SimpleNodeLinkView<NiagarinoOperators> implements NodeLinkView<NiagarinoOperators> {
+
+	/** Reverse map from nodes to ids. */
+	private final Map<NiagarinoOperators, Integer> idMap = new HashMap<>();
+
+	/** Dense list of nodes. */
+	private final List<NiagarinoOperators> nodes = new ArrayList<>();
+
+	/** List containing edges. */
+	private final List<BitSet> edges = new ArrayList<>();
+
+	/** Whether the graph is directed. */
+	private final boolean isDirected;
+
+	/**
+	 * Creates a simple node-link view.
+	 *
+	 * @param isDirected
+	 *            Whether the graph is directed.
+	 */
+	public SimpleNodeLinkView(final boolean isDirected) {
+		this.isDirected = isDirected;
+	}
+
+	@Override
+	public Iterable<NiagarinoOperators> nodes() {
+		return idMap.keySet();
+	}
+
+	@Override
+	public NiagarinoOperators getNode(final int id) {
+		for (NiagarinoOperators key : idMap.keySet()) {
+			if (idMap.get(key) == id)
+				return key;
+		}
+		// TODO maybe throw an error to give more info
+		return null;
+	}
+
+	/**
+	 * Getter.
+	 *
+	 * @param node
+	 *            The node.
+	 * @return The corresponding id.
+	 */
+	public int getId(final NiagarinoOperators node) {
+		return idMap.get(node);
+	}
+
+	@Override
+	public int nodeCount() {
+		return idMap.size();
+	}
+
+	/** This method is called whenever the graph changes. */
+	protected void onChange() {
+		// nothing to do
+	}
+
+	/**
+	 * Adds a node.
+	 *
+	 * @param node
+	 *            The node.
+	 */
+	public void addNode(final NiagarinoOperators node) {
+
+		if (idMap.containsKey(node))
+			throw new IllegalArgumentException("node " + node + " already added");
+
+		idMap.put(node, ((niagaCanvas.NiagarinoOperators) node).getID());
+		// System.out.println(idMap.values());
+		// System.out.println("These are the nodes as idMap: " + nodes);
+		edges.add(new BitSet());
+		onChange();
+	}
+
+	@Override
+	public String getName(final int index) {
+		return "Node " + index;
+	}
+
+	@Override
+	public Iterable<Integer> edgesFrom(final int node) {
+		// TODO try node +1 for directed as well
+		final int start = isDirected() ? 0 : node + 1;
+		final BitSet es = edges.get(node);
+		return new BitSetIterable(es, start);
+	}
+
+	/**
+	 * Checks whether the given indices are within bounds.
+	 * 
+	 * @deprecated since nodes that are deleted may not be the ones with the
+	 *             largest index, this only works if either the indices change
+	 *             or if only the last index is deleted. Neither is very
+	 *             practicable.
+	 * 
+	 *
+	 * @param from
+	 *            The source index.
+	 * @param to
+	 *            The destination index.
+	 */
+	@SuppressWarnings("unused")
+	private void checkIndex(final int from, final int to) {
+		final int count = nodeCount();
+		if (from < 0 || from >= count) {
+			throw new IndexOutOfBoundsException("from out of bounds: " + from + "count: " + count);
+		}
+		if (to < 0 || to >= count) {
+			throw new IndexOutOfBoundsException("to out of bounds: " + to + " count: " + count);
+		}
+	}
+
+	/**
+	 * Adds an edge between two nodes and saves OperatorID's in each operator as
+	 * either child or parent. From is the parent of to and to is the child of
+	 * from.
+	 *
+	 * @param from
+	 *            The first node.
+	 * @param to
+	 *            The second node.
+	 */
+	public void addEdge(final NiagarinoOperators from, final NiagarinoOperators to) {
+		// Only entities of the same class can be connected by an edge that are
+		// not yet connected.
+		// System.out.println("From: " + from.toString() + " to: " +
+		// to.toString() + "/n idMap: " + idMap.values());
+		if (!areConnected(getId(from), getId(to)))
+			if (from instanceof Operator && to instanceof Operator && to != from) {
+				addEdge(getId(from), getId(to));
+				((Operator) from).setChildID(((Operator) to).getID());
+				((Operator) to).setParentID(((Operator) from).getID());
+				// System.out.println("These are the edges as bitmaps: " +
+				// edges);
+
+				onChange();
+			} else if (from instanceof Stream && to instanceof Stream && to != from) {
+				addEdge(getId(from), getId(to));
+				((Stream) from).setChildID(((Stream) to).getID());
+				((Stream) to).setParentID(((Stream) from).getID());
+				// System.out.println("These are the edges as bitmaps: " +
+				// edges);
+
+				onChange();
+			}
+
+	}
+
+	/**
+	 * 
+	 * Adds an edge between two nodes.
+	 *
+	 * @param from
+	 *            The id of the first node.
+	 * @param to
+	 *            The id of the second node.
+	 */
+	public void addEdge(final int from, final int to) {
+		// checkIndex(from, to);
+		edges.get(from).set(to);
+		if (!isDirected()) {
+			edges.get(to).set(from);
+		}
+		onChange();
+	}
+
+	/**
+	 * Removes the edge given by the nodes.
+	 *
+	 * @param from
+	 *            The source node.
+	 * @param to
+	 *            The destination node.
+	 */
+	public void removeEdge(final NiagarinoOperators from, final NiagarinoOperators to) {
+		if (from instanceof Operator && to instanceof Operator) {
+			removeEdge(getId(from), getId(to));
+			((Operator) from).setChildID(niagaCanvas.NiagarinoOperators.INVALID);
+			((Operator) to).setParentID(niagaCanvas.NiagarinoOperators.INVALID);
+		} else if (from instanceof Stream && to instanceof Stream) {
+			removeEdge(getId(from), getId(to));
+			((Stream) from).setChildID(niagaCanvas.NiagarinoOperators.INVALID);
+			((Stream) to).setParentID(niagaCanvas.NiagarinoOperators.INVALID);
+		}
+	}
+
+	/**
+	 * 
+	 * Removes the edge given by the nodes.
+	 *
+	 * @param from
+	 *            The source node index.
+	 * @param to
+	 *            The destination node index.
+	 */
+	public void removeEdge(final int from, final int to) {
+		// checkIndex(from, to);
+		edges.get(from).clear(to);
+		if (!isDirected()) {
+			edges.get(to).clear(from);
+		}
+		// System.out.println("Removed Edge from " + from + " to " + to);
+		// System.out.println(edges);
+		// System.out.println("These are the nodes: " + nodes);
+		// System.out.println("This is the size: " + nodes.size());
+		onChange();
+	}
+
+	@Override
+	public boolean areConnected(final int from, final int to) {
+		// checkIndex(from, to);
+		// System.out.println(edges);
+		if (isDirected()) {
+			try {
+				return edges.get(from).get(to);
+			} catch (Exception e) {
+				return edges.get(to).get(from);
+			}
+		} else {
+			try {
+				return edges.get(from).get(to);
+			} catch (Exception e) {
+				return edges.get(to).get(from);
+			}
+		}
+	}
+
+	/** Clears all edges. */
+	public void clearEdges() {
+		for (final BitSet es : edges) {
+			es.clear();
+		}
+		onChange();
+	}
+
+	@Override
+	public boolean isDirected() {
+		return isDirected;
+	}
+
+	public void removeNode(NiagarinoOperators node) {
+
+		// remove all edges connecting the node
+		for (NiagarinoOperators candidateNode : this.nodes()) {
+			if (areConnected(getId(node), getId(candidateNode))) {
+				removeEdge(node, candidateNode);
+			}
+		}
+		idMap.remove(node);
+		nodes.remove(node);
+	}
+
+	/**
+	 * Getter
+	 * 
+	 * @return the idMap
+	 */
+	public Map<NiagarinoOperators, Integer> getIdMap() {
+		return idMap;
+	}
+
+	/**
+	 * Getter
+	 * 
+	 * @return the nodes
+	 */
+	public List<NiagarinoOperators> getNodes() {
+		return nodes;
+	}
+
+	/**
+	 * Getter
+	 * 
+	 * @return the edges
+	 */
+	public List<BitSet> getEdges() {
+		return edges;
+	}
+}

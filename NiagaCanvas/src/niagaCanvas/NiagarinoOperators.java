@@ -1,0 +1,89 @@
+package niagaCanvas;
+
+import java.util.ArrayList;
+
+import jkanvas.nodelink.IndexedPosition;
+
+public abstract class NiagarinoOperators extends IndexedPosition {
+	private int id;
+	ArrayList<IndexedPosition> elements;
+	public static final int INVALID = -1;
+
+	private int parentID;
+	private int childID;
+	private int streamID;
+	String name;
+	public boolean resizable;
+
+	public NiagarinoOperators(double x, double y, int index) {
+		super(x, y, index);
+		this.id = index;
+		this.parentID = NiagarinoOperators.INVALID;
+		this.childID = NiagarinoOperators.INVALID;
+		this.streamID = NiagarinoOperators.INVALID;
+		this.elements = new ArrayList<IndexedPosition>();
+		this.name = "";
+
+		this.resizable = true;
+	}
+
+	public int getID() {
+		return this.id;
+	}
+
+	/**
+	 * @return the elements
+	 */
+	public ArrayList<IndexedPosition> getElements() {
+		return this.elements;
+	}
+
+	/**
+	 * @param elements
+	 *            the elements to set
+	 */
+	public void setElements(ArrayList<IndexedPosition> elements) {
+		this.elements = elements;
+	}
+
+	/**
+	 * getter
+	 * 
+	 * @return the NiagarinoOperators ID
+	 */
+	public int getParentID() {
+		return parentID;
+	}
+
+	/**
+	 * setter Sets the NiagarinoOperators ID of the parent.
+	 */
+	public void setParentID(int parentID) {
+		this.parentID = parentID;
+	}
+
+	/**
+	 * getter
+	 * 
+	 * @return the NiagarinoOperators ID
+	 */
+	public int getChildID() {
+		return childID;
+	}
+
+	/**
+	 * setter Sets the NiagarinoOperators ID of the parent.
+	 */
+	public void setChildID(int childID) {
+		this.childID = childID;
+	}
+
+	public int getStreamID() {
+		return this.streamID;
+	}
+
+	public void setStreamID(Stream parent) {
+		this.streamID = parent.getID();
+	}
+
+}

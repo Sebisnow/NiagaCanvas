@@ -1,0 +1,27 @@
+Resize of Stream
+
+Drag Stream take rest with it
+
+Link Operators by connection and save it -- Done
+
+Populate left side of the SplitPane
+
+Populate MenuBar
+
+Add Rest of NiaOperators
+
+! Generate XML !
+
+Make integration of NiaOps into Streams nicer
+
+
+
+Use Annotations on referenced things as well -> Classes implementing Predicate
+
+
+
+
+
+
+Niagarino possible issue:
+-is abstract Class Segment in Operator used at all?

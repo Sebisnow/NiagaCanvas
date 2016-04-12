@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<plan>
+  <schema name="">
+    <int name="plan" progressing="0"/>
+    <double name="s" progressing="1"/>
+  </schema>
+  <Stream name="hans">
+    <Operator class="niagaCanvas.Operator" name="ujhkjjk  "/>
+    <Operator class="niagaCanvas.Operator" name="OperatorID4"/>
+    <Operator class="niagaCanvas.Operator" name="predicate">
+      <object class="dsadasda" name="predicate"/>
+    </Operator>
+  </Stream>
+</plan>
