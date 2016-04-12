@@ -1,0 +1,52 @@
+{
+    "template": "canvas",
+    "width": "500",
+    "height": "500",
+    "restriction": "auto",
+    "content": [
+        {
+            "template": "title",
+            "position": "jkanvas.painter.pod.AbstractTitleRenderpass.Position.BELOW",
+            "orientation": "jkanvas.util.StringDrawer.Orientation.VERTICAL",
+            "titles": "#odds",
+            "parent": {
+                "template": "title",
+                "position": "jkanvas.painter.pod.AbstractTitleRenderpass.Position.RIGHT",
+                "titles": "#odds",
+                "parent": {
+                    "template": "title",
+                    "position": "jkanvas.painter.pod.AbstractTitleRenderpass.Position.LEFT",
+                    "titles": "#evens",
+                    "parent": "#topTitle",
+                },
+            },
+        },
+    ],
+    "huds": [
+    ],
+    "import": [
+        "std.json",
+    ],
+    "objects": [
+        {
+            "id": "main",
+            "type": "jkanvas.examples.MatrixMain",
+            "args": "matrix,color,refresh",
+            "matrix": "#matrix",
+            "color": "#cell",
+            "refresh": "#painter",
+        },
+        {
+            "id": "topTitle",
+            "template": "title",
+            "orientation": "jkanvas.util.StringDrawer.Orientation.DIAGONAL",
+            "titles": "#evens",
+            "parent": {
+                "template": "border",
+                "parent": "#main",
+            },
+        },
+    ],
+    "templates": {
+    },
+}

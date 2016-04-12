@@ -1,0 +1,4 @@
+*.log
+/java.hprof.txt
+/target/
+/pics/
