@@ -20,8 +20,6 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import jkanvas.animation.AnimatedPosition;
-
 public class NiaXMLConverter {
 
 	/**
@@ -147,12 +145,7 @@ public class NiaXMLConverter {
 	 */
 	private void streams(Document doc, Element root) throws DataFormatException {
 
-		// save all Streams
-		for (AnimatedPosition op : this.editor.view.getIdMap().keySet()) {
-			if (op instanceof Stream) {
-				this.streamSet.add((Stream) op);
-			}
-		}
+		this.streamSet = new ArrayList<Stream>(this.editor.view.getStreams());
 		System.out.println("The StreamSet:" + this.streamSet);
 
 		// get the root Stream to start with.

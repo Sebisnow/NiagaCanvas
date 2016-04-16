@@ -6,6 +6,7 @@ import java.awt.Shape;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RectangularShape;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Objects;
@@ -136,7 +137,15 @@ public class DefaultNodeLinkRenderpass<T extends AnimatedPosition> extends Rende
 		final Rectangle2D visible = ctx.getVisibleCanvas();
 		final RectangularNodeRealizer<T> streamRealizer = new RectangularNodeRealizer<T>();
 		final DefaultNodeRealizer<T> operatorRealizer = new DefaultNodeRealizer<T>();
-		int count = 0;
+		int count = 0, secCount = 0;
+
+		this.checkOperatorsStreamID();
+
+		// no Stream on Canvas, create one.
+		if (view.getStreams().size() == 0) {
+			view.addNode((T) new Stream(200, 200));
+		}
+		this.checkStreams();
 		for (final Stream node : view.getStreams()) {
 			++count;
 			// automatically adds new nodes to the animation list
@@ -149,6 +158,7 @@ public class DefaultNodeLinkRenderpass<T extends AnimatedPosition> extends Rende
 			final double y = node.getY();
 			final Shape nodeShape = streamRealizer.createNodeShape((T) node, x, y);
 			if (!nodeShape.intersects(visible)) {
+				--count;
 				continue;
 			}
 			final Graphics2D g = (Graphics2D) gfx.create();
@@ -158,42 +168,90 @@ public class DefaultNodeLinkRenderpass<T extends AnimatedPosition> extends Rende
 			g.dispose();
 		}
 
-		int secCount = 0;
 		for (final Operator node : view.getOperators()) {
-			++secCount;
-			// automatically adds new nodes to the animation list
-			// this needs only to be done in the draw method
-			if (!lastNodes.contains(node)) {
-				list.addAnimated(node);
-				lastNodes.add((T) node);
+			// If the node is not on a Stream put it on a Stream.
+			ArrayList<Stream> intersectList = new ArrayList<Stream>();
+			for (final Stream stream : view.getStreams()) {
+				final Shape nodeShape = streamRealizer.createNodeShape((T) stream, stream.getX(), stream.getY());
+				if (nodeShape.contains(node.getPos())) {
+					intersectList.add(stream);
+				}
 			}
-			final double x = node.getX();
-			final double y = node.getY();
-			final Shape nodeShape = operatorRealizer.createNodeShape((T) node, x, y);
-			if (!nodeShape.intersects(visible)) {
-				continue;
+			if (intersectList.size() > 0) {
+				// There is no valid StreamID set for this node although it
+				// intersects a Stream, then take any of the intersecting
+				// Streams and add it.
+				if (!intersectList.contains(view.getNode(node.getStreamID()))) {
+					node.setStreamID(intersectList.get(0));
+					intersectList.get(0).addOperator(node);
+
+				}
+				++secCount;
+
+				// automatically adds new nodes to the animation list
+				// this needs only to be done in the draw method
+				if (!lastNodes.contains(node)) {
+					list.addAnimated(node);
+					lastNodes.add((T) node);
+				}
+				final double x = node.getX();
+				final double y = node.getY();
+				final Shape nodeShape = operatorRealizer.createNodeShape((T) node, x, y);
+				if (!nodeShape.intersects(visible)) {
+					continue;
+				}
+				final Graphics2D g = (Graphics2D) gfx.create();
+
+				g.setComposite(AlphaComposite.getInstance(2, 1.0f));
+				operatorRealizer.drawNode(g, (T) node);
+
+				g.dispose();
+			} else {
+				// There is no Stream intersecting this Operator, move it.
+				Stream stream = view.getStreams().get(0);
+				node.setStreamID(stream);
+				stream.addOperator(node);
+				node.setPosition(stream.getPos());
 			}
-			final Graphics2D g = (Graphics2D) gfx.create();
 
-			g.setComposite(AlphaComposite.getInstance(2, 1.0f));
-			operatorRealizer.drawNode(g, (T) node);
-
-			g.dispose();
 		}
-		// else {
-		// final Shape nodeShape = streamRealizer.createNodeShape(node, x,
-		// y);
-		// if (!nodeShape.intersects(visible)) {
-		// continue;
-		// }
-		// final Graphics2D g = (Graphics2D) gfx.create();
-		// nodeRealizer.drawNode(g, node);
-		// g.dispose();
-		// }
-
 		if (count + secCount < lastNodes.size()) {
 			// clear set when nodes got removed
 			lastNodes.clear();
+		}
+	}
+
+	/**
+	 * Helper Method, that checks the OperatorLists of all Streams in this view
+	 * to make sure there are no Operators on more than one Stream.
+	 * 
+	 */
+	private void checkStreams() {
+		for (Stream st : this.view.getStreams()) {
+			for (Stream secSt : this.view.getStreams()) {
+				if (st != secSt)
+					this.checkOperators(secSt, st);
+			}
+		}
+	}
+
+	/**
+	 * Helper Method, that compares the Operators in two Streams and deletes the
+	 * Operator from one Stream if it is contained in both. If the operator that
+	 * is in both Streams has a StreamID set it is deleted from the other stream
+	 * and kept in the Stream the Operator belongs to.
+	 * 
+	 */
+	private void checkOperators(Stream fstStream, Stream secStream) {
+		for (Operator op : fstStream.getOperatorList()) {
+			if (secStream.getOperatorList().contains(op)) {
+				if (this.view.getNode(op.getStreamID()) == fstStream) {
+					secStream.getOperatorList().remove(op);
+				} else {
+					op.setStreamID(fstStream);
+					fstStream.getOperatorList().remove(op);
+				}
+			}
 		}
 	}
 
@@ -250,18 +308,21 @@ public class DefaultNodeLinkRenderpass<T extends AnimatedPosition> extends Rende
 	 * @param pos
 	 *            The position.
 	 * @return The node or <code>null</code> if there is no node at the given
-	 *         position.
+	 *         position. Returns Operator if there is an Operator and a Stream.
 	 */
 	public T pick(final Point2D pos) {
 		final RectangularNodeRealizer<T> streamRealizer = new RectangularNodeRealizer<T>();
 		final DefaultNodeRealizer<T> operatorRealizer = new DefaultNodeRealizer<T>();
-		T cur = null;
+		T cur = null, op = null;
 		for (final T node : view.nodes()) {
-			final double x = node.getX();
-			final double y = node.getY();
+			final double x = node.getX(), y = node.getY();
 			Shape shape = streamRealizer.createNodeShape(node, x, y);
 			if (node instanceof Operator) {
 				shape = operatorRealizer.createNodeShape(node, x, y);
+				if (shape.contains(pos)) {
+					// return the last match -- ie topmost node
+					op = node;
+				}
 			}
 
 			if (shape.contains(pos)) {
@@ -269,7 +330,7 @@ public class DefaultNodeLinkRenderpass<T extends AnimatedPosition> extends Rende
 				cur = node;
 			}
 		}
-		return cur;
+		return op != null ? op : cur;
 	}
 
 	/**
@@ -329,6 +390,28 @@ public class DefaultNodeLinkRenderpass<T extends AnimatedPosition> extends Rende
 		}
 
 		return last;
+	}
+
+	/**
+	 * Checks whether all Operators have a Stream ID
+	 * 
+	 */
+	@SuppressWarnings("unchecked")
+	public void checkOperatorsStreamID() {
+		final RectangularNodeRealizer<T> streamRealizer = new RectangularNodeRealizer<T>();
+		for (Operator op : this.view.getOperators()) {
+			if (op.getStreamID() != niagaCanvas.NiagarinoOperators.INVALID) {
+				for (final Stream stream : view.getStreams()) {
+					final Shape nodeShape = streamRealizer.createNodeShape((T) stream, stream.getX(), stream.getY());
+					if (nodeShape.contains(op.getPos())) {
+						op.setStreamID(stream);
+						stream.addOperator(op);
+					}
+				}
+			} else {
+
+			}
+		}
 	}
 
 	@Override

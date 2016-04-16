@@ -40,6 +40,12 @@ public class EditorUI extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private Canvas c;
 	public String name;
+
+	/**
+	 * @param view
+	 *            The View that takes care of all the action - node adding,
+	 *            removing etc.
+	 **/
 	public SimpleLayoutedView<AnimatedPosition> view;
 	/**
 	 * @param schema
@@ -241,11 +247,9 @@ public class EditorUI extends JFrame {
 			this.pass = mng.getForId("painter", RenderpassPainter.class);
 			this.pass.addPass(r);
 		} catch (IOException e1) {
-			// TOO Auto-generated catch block
+			// TOO Auto-generated catch block works best
 			e1.printStackTrace();
 		}
-
-		// uncomment for start Window
 		SchemaWindow s = new SchemaWindow(this);
 		s.frame.setAutoRequestFocus(true);
 		// frame.add(c);
@@ -253,13 +257,7 @@ public class EditorUI extends JFrame {
 	}
 
 	public void addNiagarinoOperator(NiagarinoOperators op) {
-		this.view = new SimpleLayoutedView<AnimatedPosition>(c, true);
-
-		// creates a subclass of NodeLinkRenderpass
-		NodeLink r = new NodeLink(this.view, this.c);
-		r.setNodeRealizer(new RectangularNodeRealizer<AnimatedPosition>());
 		this.view.addNode(op);
-		this.pass.addPass(r);
 		// TODO assign focus so that op is drawn right away not just
 		// after clicking on canvas
 

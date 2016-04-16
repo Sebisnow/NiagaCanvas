@@ -6,6 +6,8 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RectangularShape;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
@@ -84,6 +86,9 @@ public final class NodeLink extends DefaultNodeLinkRenderpass<AnimatedPosition> 
 
 	/** The primary selection. */
 	private AnimatedPosition primSel;
+
+	/** The Operatorlist of a Stream as ArrayList, for dragging. */
+	private Map<AnimatedPosition, Integer[]> opList = new HashMap<AnimatedPosition, Integer[]>();
 
 	/** The start x position of the current drag. */
 	private double startX;
@@ -218,14 +223,23 @@ public final class NodeLink extends DefaultNodeLinkRenderpass<AnimatedPosition> 
 
 	@Override
 	public boolean acceptDrag(final Point2D p, final MouseEvent e) {
-		if (!SwingUtilities.isLeftMouseButton(e)) {
-
+		if (SwingUtilities.isRightMouseButton(e)) {
 			return false;
 		}
 		final AnimatedPosition n = pick(p);
 		if (n == null)
 			return false;
 		// initialize node dragging
+		if (n instanceof Stream) {
+			this.opList.clear();
+			for (AnimatedPosition op : ((Stream) n).getOperatorList()) {
+				Integer[] x = new Integer[2];
+				x[0] = (int) op.getX();
+				x[1] = (int) op.getY();
+				this.opList.put(op, x);
+				op.clearAnimation();
+			}
+		}
 		primSel = n;
 		primSel.clearAnimation();
 		startX = primSel.getX();
@@ -235,6 +249,13 @@ public final class NodeLink extends DefaultNodeLinkRenderpass<AnimatedPosition> 
 
 	@Override
 	public void drag(final Point2D start, final Point2D cur, final double dx, final double dy) {
+		// Animate the content of a stream
+		if (primSel instanceof Stream) {
+			for (AnimatedPosition op : this.opList.keySet()) {
+				op.setPosition(this.opList.get(op)[0] + dx, this.opList.get(op)[1] + dy);
+			}
+		}
+
 		primSel.setPosition(startX + dx, startY + dy);
 	}
 
@@ -242,7 +263,11 @@ public final class NodeLink extends DefaultNodeLinkRenderpass<AnimatedPosition> 
 	public void endDrag(final Point2D start, final Point2D cur, final double dx, final double dy) {
 		// draw shape around the position and check whether that shape
 		// intersects the shape of another node
+
 		final AnimatedPosition n = pickShape(cur);
+		if (pick(start) instanceof Operator && !(n instanceof Stream)) {
+			return;
+		}
 
 		if (n == null) {
 			drag(start, cur, dx, dy);
@@ -255,7 +280,6 @@ public final class NodeLink extends DefaultNodeLinkRenderpass<AnimatedPosition> 
 				// Add Operator to the Stream
 				startOperator.setStreamID(stream);
 				if (!stream.getOperatorList().contains(startOperator)) {
-
 					System.out.println("Placed on Stream:");
 					stream.addOperator(startOperator);
 				}

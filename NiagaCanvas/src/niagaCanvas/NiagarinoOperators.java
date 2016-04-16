@@ -86,4 +86,10 @@ public abstract class NiagarinoOperators extends IndexedPosition {
 		this.streamID = parent.getID();
 	}
 
+	/**
+	 * setter Sets the StreamID of the Operator to Invalid.
+	 */
+	public void deleteStreamID() {
+		this.streamID = NiagarinoOperators.INVALID;
+	}
 }
