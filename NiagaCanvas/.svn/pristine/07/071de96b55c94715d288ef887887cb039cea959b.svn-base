@@ -211,7 +211,7 @@ public final class NodeLink extends DefaultNodeLinkRenderpass<AnimatedPosition> 
 			return null;
 		// TODO also return the name of the Node if there is a node at p
 		// return NodeLink.getClassName(n)
-		return n.getName();
+		return n.name;
 
 	}
 

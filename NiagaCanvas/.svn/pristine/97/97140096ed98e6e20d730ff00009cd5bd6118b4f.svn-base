@@ -1,0 +1,379 @@
+package niagaCanvas;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.zip.DataFormatException;
+
+import javax.swing.JOptionPane;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+public class NiaXMLConverter {
+
+	/**
+	 * @param editor
+	 *            The Editor Frame to get all necessary information from.
+	 * 
+	 */
+	private EditorUI editor;
+
+	/**
+	 * @param streamSet
+	 *            List of Streams to be XMLd.
+	 * 
+	 */
+	private ArrayList<Stream> streamSet;
+
+	/**
+	 * @param operatorSet
+	 *            List of Operators to be XMLd initialized for every Stream
+	 *            separately.
+	 * 
+	 */
+	private ArrayList<Operator> operatorSet;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param editor
+	 *            The Editor Frame to get all necessary information from.
+	 * @throws DataFormatException
+	 *             Throws an exception if no Stream or no Schema have been
+	 *             specified by the user.
+	 */
+	public NiaXMLConverter(EditorUI editor) throws DataFormatException {
+		this(editor.name, editor);
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param editor
+	 *            The Editor Frame to get all necessary information from.
+	 * @throws DataFormatException
+	 *             Throws an exception if no Stream or no Schema have been
+	 *             specified by the user.
+	 */
+	public NiaXMLConverter(String xml, EditorUI editor) throws DataFormatException {
+		this.streamSet = new ArrayList<Stream>();
+		this.operatorSet = new ArrayList<Operator>();
+		this.editor = editor;
+		try {
+
+			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+
+			// root elements
+			Document doc = docBuilder.newDocument();
+			Element rootElement = doc.createElement("plan");
+			doc.appendChild(rootElement);
+
+			Element schema = doc.createElement("schema");
+			Attr name = doc.createAttribute("name");
+			name.setValue(editor.name);
+			schema.setAttributeNode(name);
+			rootElement.appendChild(schema);
+
+			this.writeSchema(doc, schema);
+
+			this.streams(doc, rootElement);
+
+			System.out.println(doc);
+			// write the content into xml file
+			TransformerFactory transformerFactory = TransformerFactory.newInstance();
+			Transformer transformer = transformerFactory.newTransformer();
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+			DOMSource source = new DOMSource(doc);
+			StreamResult result = new StreamResult(new File("file.xml"));
+
+			// Output to console for testing
+			// StreamResult result = new StreamResult(System.out);
+
+			transformer.transform(source, result);
+			JOptionPane.showMessageDialog(this.editor, "File saved");
+			System.out.println("File saved!");
+
+		} catch (ParserConfigurationException pce) {
+			pce.printStackTrace();
+		} catch (TransformerException tfe) {
+			tfe.printStackTrace();
+		}
+	}
+
+	/**
+	 * Write the schema part of the xml.
+	 * 
+	 * @param doc
+	 *            The document that creates attributes
+	 * @param schema
+	 *            The schema element to attach attributes to
+	 */
+	private void writeSchema(Document doc, Element schema) {
+		for (String[] attribute : this.editor.schema) {
+
+			Element elem = doc.createElement(attribute[1]);
+			elem.setAttribute("name", attribute[0]);
+			if (attribute.length > 2)
+				elem.setAttribute("progressing", attribute[2]);
+
+			schema.appendChild(elem);
+		}
+	}
+
+	/**
+	 * Write the streams part of the xml.
+	 * 
+	 * @param doc
+	 *            The document that creates attributes
+	 * @param schema
+	 *            The schema element to attach attributes to
+	 * @return
+	 * @throws DataFormatException
+	 */
+	private void streams(Document doc, Element root) throws DataFormatException {
+
+		this.streamSet = new ArrayList<Stream>(this.editor.view.getStreams());
+		System.out.println("The StreamSet:" + this.streamSet);
+
+		// get the root Stream to start with.
+		while (streamSet.size() > 0) {
+			Stream rootStream = (Stream) this.getRoot(this.streamSet.iterator());
+			if (rootStream == null) {
+				break;
+			} else {
+				this.writeStream(rootStream, doc, root);
+			}
+		}
+		// Element elem = doc.createElement(attribute[1]);
+		// elem.setAttribute("name", attribute[0]);
+		// if (attribute.length > 2)
+		// elem.setAttribute("progressing", attribute[2]);
+		//
+		// schema.appendChild(elem);
+	}
+
+	/**
+	 * Appends a Stream with its Operators to the XML structure.
+	 * 
+	 * @param stream
+	 *            The Stream to append to the XML.
+	 * @param doc
+	 *            The XML Document helper.
+	 * @param root
+	 *            The current element to append the Stream to.
+	 */
+	private void writeStream(Stream stream, Document doc, Element root) {
+		System.out.println("Write Stream");
+		Element st = doc.createElement("Stream");
+		st.setAttribute("name", stream.name);
+
+		// get the name of the parent node and set it as attribute.
+		if (stream.getParentID() != NiagarinoOperators.INVALID) {
+			st.setAttribute("previous", ((Stream) this.editor.view.getNode(stream.getParentID())).name);
+		}
+
+		if (stream.getOperatorList().size() > 0) {
+			System.out.println("Write Operator");
+			this.operatorSet = stream.getOperatorList();
+			this.writeOperators(doc, st);
+		}
+		root.appendChild(st);
+		this.streamSet.remove(stream);
+	}
+
+	/**
+	 * 
+	 * @param iter
+	 *            The iterator of NiagarioOperators to get the root from.
+	 * @return The root Stream or if there are many unconnected streams a stream
+	 *         that has no parent.
+	 */
+	private NiagarinoOperators getRoot(Iterator<? extends NiagarinoOperators> iter) {
+		NiagarinoOperators op;
+		if (iter.hasNext()) {
+			op = iter.next();
+			System.out.println("Had Next: " + op);
+
+			while (op.getParentID() != NiagarinoOperators.INVALID && iter.hasNext()) {
+				op = iter.next();
+				System.out.println("In the loop" + op);
+			}
+			return op;
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * This recursive Methods appends all Operators in the specified list in
+	 * Order to the Stream Elements. It makes the assumption that all Operators
+	 * in the Stream are connected and thus have a parentID or a childID.
+	 * 
+	 * @param arrayList
+	 *            The iterator of NiagarioOperators to get the root from.
+	 * @param st
+	 *            The Stream to append the Operators to.
+	 * @param doc
+	 *            The XML Document to write to.
+	 */
+	private void writeOperators(Document doc, Element stElem) {
+		Operator op = (Operator) this.getRoot(this.operatorSet.iterator());
+
+		System.out.println(op + " this and the name of operator " + op.name);
+		this.writeOneOperator(op, doc, stElem);
+
+		while (op.getChildID() != NiagarinoOperators.INVALID) {
+			op = (Operator) this.editor.view.getNode(op.getChildID());
+			this.writeOneOperator(op, doc, stElem);
+		}
+		if (this.operatorSet.size() > 0) {
+			writeOperators(doc, stElem);
+		}
+
+	}
+
+	/**
+	 * Helper method that appends one Operator to the XML.
+	 * 
+	 * @param op
+	 *            The Operator to write.
+	 * @param st
+	 *            The Stream to append the Operator to.
+	 * @param doc
+	 *            The XML Document to write to.
+	 */
+	private void writeOneOperator(Operator op, Document doc, Element stElem) {
+		this.operatorSet.remove(op);
+		System.out.println("WriteOneOperator->");
+		Element opElem = doc.createElement("Operator");
+		opElem.setAttribute("name", op.name);
+		opElem.setAttribute("class", op.getClass().getName());
+
+		stElem.appendChild(opElem);
+
+		Iterator<String> it = op.attributes.keySet().iterator();
+		/**
+		 * This part is only implemented to get the same structure as the
+		 * benchmark xml. In XML there are only 4 elements with sub elements to
+		 * be considered (object, functions, group, type).
+		 * 
+		 * {String, boolean, int, double and long} are converted to type.
+		 * 
+		 * {Predicate} is converted to object.
+		 * 
+		 * {Group} is converted to group.
+		 * 
+		 * {StringFunctionand AggregationFunction} are converted to functions.
+		 * 
+		 **/
+		System.out.println("The Iterator over that key set: " + op.attributes.keySet());
+		String type = null;
+		// write all attributes of the Operator.
+		while (it.hasNext()) {
+			type = it.next();
+			ArrayList<String> attributes = op.attributes.get(type);
+			Element string = null;
+
+			switch (type) {
+			case "String":
+				for (String att : attributes) {
+					string = doc.createElement("type");
+					string.appendChild(doc.createTextNode(att));
+				}
+				opElem.appendChild(string);
+				break;
+
+			case "boolean":
+				for (String att : attributes) {
+					string = doc.createElement("type");
+					string.appendChild(doc.createTextNode(att));
+				}
+				opElem.appendChild(string);
+				break;
+
+			case "int":
+				for (String att : attributes) {
+					string = doc.createElement("type");
+					string.appendChild(doc.createTextNode(att));
+				}
+				opElem.appendChild(string);
+				break;
+
+			case "double":
+				for (String att : attributes) {
+					string = doc.createElement("type");
+					string.appendChild(doc.createTextNode(att));
+				}
+				opElem.appendChild(string);
+				break;
+
+			case "long":
+				for (String att : attributes) {
+					string = doc.createElement("type");
+					string.appendChild(doc.createTextNode(att));
+				}
+				opElem.appendChild(string);
+				break;
+
+			case "Predicate":
+
+				string = doc.createElement("object");
+				string.setAttribute("name", "predicate");
+				string.setAttribute("class", attributes.get(1));
+				// What kind of predicate is never specified in the XML,
+				// would be attributes.get(0).
+				opElem.appendChild(string);
+				break;
+
+			case "Group":
+				string = doc.createElement("group");
+				for (String att : attributes) {
+					Element attrElem = doc.createElement("attribute");
+					attrElem.setAttribute("name", att);
+					string.appendChild(attrElem);
+				}
+				opElem.appendChild(string);
+				break;
+
+			case "StringFunction":
+				string = doc.createElement("function");
+				for (String att : attributes) {
+					// TODO not final, just preliminary, depends on how it is
+					// saved in the OptionWindow.
+					Element attrElem = doc.createElement("min or max or count");
+					attrElem.setAttribute("attribute", att);
+					string.appendChild(attrElem);
+				}
+				opElem.appendChild(string);
+				break;
+
+			case "AggregationFunction":
+				string = doc.createElement("function");
+				for (String att : attributes) {
+					// TODO not final, just preliminary, depends on how it is
+					// saved in the OptionWindow.
+					Element attrElem = doc.createElement("min or max or count");
+					attrElem.setAttribute("attribute", att);
+					string.appendChild(attrElem);
+				}
+				opElem.appendChild(string);
+				break;
+			default:
+				break;
+			}
+		}
+	}
+}

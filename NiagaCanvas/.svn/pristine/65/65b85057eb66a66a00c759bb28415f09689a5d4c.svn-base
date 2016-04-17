@@ -12,7 +12,7 @@ public abstract class NiagarinoOperators extends IndexedPosition {
 	private int parentID;
 	private int childID;
 	private int streamID;
-	protected String name;
+	String name;
 	public boolean resizable;
 
 	public NiagarinoOperators(double x, double y, int index) {
@@ -91,24 +91,5 @@ public abstract class NiagarinoOperators extends IndexedPosition {
 	 */
 	public void deleteStreamID() {
 		this.streamID = NiagarinoOperators.INVALID;
-	}
-
-	/**
-	 * Getter
-	 * 
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
-
-	/**
-	 * Setter
-	 * 
-	 * @param name
-	 *            the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
 	}
 }

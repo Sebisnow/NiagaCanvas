@@ -1,4 +1,4 @@
-package niagaCanvas;
+package deprecated;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -10,6 +10,8 @@ import java.awt.event.MouseEvent;
 import javax.swing.JComponent;
 import javax.swing.event.MouseInputAdapter;
 import javax.swing.event.MouseInputListener;
+
+import niagaCanvas.ResizableBorder;
 
 public class Resizable extends JComponent {
 

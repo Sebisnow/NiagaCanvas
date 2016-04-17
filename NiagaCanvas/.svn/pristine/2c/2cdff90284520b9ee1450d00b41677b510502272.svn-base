@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<plan>
+  <schema name=""/>
+  <Stream name="StreamID0">
+    <Operator class="niagaCanvas.Operator" name="OperatorID2"/>
+    <Operator class="niagaCanvas.Operator" name="OperatorID1"/>
+  </Stream>
+</plan>
