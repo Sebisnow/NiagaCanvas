@@ -6,7 +6,6 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RectangularShape;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -138,6 +137,7 @@ public final class NodeLink extends DefaultNodeLinkRenderpass<AnimatedPosition> 
 				}
 			}
 		}
+		System.out.println(n);
 		// left mouse Button pressed
 		if (n == null) {
 			if (secSel instanceof Stream) {
@@ -183,6 +183,7 @@ public final class NodeLink extends DefaultNodeLinkRenderpass<AnimatedPosition> 
 		NiagarinoOperators node = (NiagarinoOperators) pick(pos);
 		// On double right click remove the node
 		if (SwingUtilities.isRightMouseButton(e) && node != null) {
+			System.out.println("To be deleted: " + node.getID());
 			this.simpleView.removeNode(node);
 			primSel = null;
 			secSel = null;
@@ -215,7 +216,7 @@ public final class NodeLink extends DefaultNodeLinkRenderpass<AnimatedPosition> 
 			return null;
 		// TODO also return the name of the Node if there is a node at p
 		// return NodeLink.getClassName(n)
-		return n.name.contains("ID") ? Integer.toString(n.getID()) : n.name + ": " + "ID: " + n.getID();
+		return n.getName();
 
 	}
 
@@ -313,28 +314,5 @@ public final class NodeLink extends DefaultNodeLinkRenderpass<AnimatedPosition> 
 				RenderpassPainter.addToRect(bbox, endShape.getBounds2D());
 			}
 		}
-	}
-
-	/**
-	 * TODO unfinished Checks whether the node in question is part of a circle.
-	 * 
-	 * @param node
-	 *            the node to start from.
-	 * @return True if the node is part of a circle, false otherwise.
-	 */
-	public boolean isCircle(NiagarinoOperators node) {
-		int inval = NiagarinoOperators.INVALID;
-		ArrayList<NiagarinoOperators> seenNodes = new ArrayList<NiagarinoOperators>();
-		while (node.getChildID() != inval) {
-			if (!seenNodes.contains(node)) {
-				seenNodes.add(node);
-				node = (NiagarinoOperators) this.view.getNode(node.getChildID());
-
-			} else {
-				return true;
-			}
-		}
-		return false;
-
 	}
 }

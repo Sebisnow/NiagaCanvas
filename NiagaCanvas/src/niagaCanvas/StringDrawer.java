@@ -273,9 +273,8 @@ public class StringDrawer {
 	 */
 	public void draw(final Point2D pos, final int hpos, final int vpos, final boolean bool) {
 		final Graphics2D g = (Graphics2D) gfx.create();
-		// TODO if Stream size gets adapted, then String might not be on the TOP
-		g.translate(pos.getX() + getHorizontalOffset(hpos),
-				pos.getY() - 20 - bbox.getHeight() + getVerticalOffset(vpos, false));
+		// TODO if Stream text gets adapted, then String might not be on the TOP
+		g.translate(pos.getX() + getHorizontalOffset(hpos), pos.getY() - 20);
 		g.drawString(str, 0, 0);
 		if (jkanvas.Canvas.DEBUG_BBOX) {
 			g.setColor(java.awt.Color.RED);

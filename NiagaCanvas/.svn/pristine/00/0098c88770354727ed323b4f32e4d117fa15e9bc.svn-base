@@ -178,7 +178,7 @@ public class SimpleNodeLinkView<NiagarinoOperators> implements NodeLinkView<Niag
 					onChange();
 				}
 			} else if (from instanceof Stream && to instanceof Stream && to != from) {
-				if (((Stream) from).getChildID() == inval && ((Stream) to).getParentID() == inval) {
+				if (((Operator) from).getChildID() == inval && ((Operator) to).getParentID() == inval) {
 					addEdge(getId(from), getId(to));
 					((Stream) from).setChildID(((Stream) to).getID());
 					((Stream) to).setParentID(((Stream) from).getID());

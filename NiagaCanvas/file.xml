@@ -2,9 +2,10 @@
 <plan>
   <schema name=""/>
   <Stream name="StreamID0">
-    <Operator class="niagacanvas.operator.Selection" name="sel">
-      <object class="sasas" name="predicate"/>
-    </Operator>
-    <Operator class="niagacanvas.operator.TopK" name="top"/>
+    <Operator class="" name="OperatorID2"/>
+    <Operator class="" name="OperatorID1"/>
+    <Operator class="" name="OperatorID4"/>
+    <Operator class="" name="OperatorID5"/>
+    <Operator class="" name="OperatorID3"/>
   </Stream>
 </plan>
