@@ -176,12 +176,6 @@ public class OptionWindow extends JFrame {
 		gbc_textField.gridy = 0;
 		getContentPane().add(textField, gbc_textField);
 
-		if (operator.getParentID() != NiagarinoOperators.INVALID) {
-			setParent();
-		}
-		if (operator.getChildID() != NiagarinoOperators.INVALID) {
-			setChild();
-		}
 		// Handle Operator Type fun.
 		JLabel lblOperatorType = new JLabel("Operator Type");
 		lblOperatorType.setName("Name");
@@ -194,16 +188,6 @@ public class OptionWindow extends JFrame {
 
 		JComboBox<String> comboBox = new JComboBox<String>();
 		comboBox.setName("Name");
-		comboBox.addItemListener(new ItemListener() {
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				if (!e.getItem().equals("")) {
-					((Operator) op).properties.put("OperatorType", (String) e.getItem());
-					redrawOperator((String) e.getItem());
-
-				}
-			}
-		});
 		comboBox.addItem("");
 		String opType = operator.properties.get("OperatorType");
 		Reflections reflections = new Reflections("niagacanvas.operator");
@@ -214,7 +198,28 @@ public class OptionWindow extends JFrame {
 		for (Class<?> cl : classes) {
 			comboBox.addItem(cl.getSimpleName());
 		}
-		comboBox.setSelectedItem(opType);
+		comboBox.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (!e.getItem().equals("")) {
+					for (Class<?> cl : classes) {
+						if (cl.getSimpleName().equals(e.getItem())) {
+							((Operator) op).properties.put("OperatorType", (String) cl.getCanonicalName());
+						}
+					}
+
+					redrawOperator((String) e.getItem());
+
+				}
+			}
+		});
+		// necessary for selection after saving due to taking the simple name
+		// but saving canonical name for xml creation
+		for (Class<?> cl : classes) {
+			if (cl.getCanonicalName().equals(opType)) {
+				comboBox.setSelectedItem(cl.getSimpleName());
+			}
+		}
 
 		GridBagConstraints gbc_comboBox = new GridBagConstraints();
 		gbc_comboBox.insets = new Insets(0, 0, 5, 5);
@@ -232,28 +237,6 @@ public class OptionWindow extends JFrame {
 
 		this.pack();
 		this.setVisible(true);
-
-	}
-
-	/**
-	 * Helper method to show ChildId
-	 */
-	private void setChild() {
-		JLabel lblName = new JLabel("Name:");
-		GridBagConstraints gbc_lblName = new GridBagConstraints();
-		gbc_lblName.insets = new Insets(0, 0, 5, 5);
-		gbc_lblName.anchor = GridBagConstraints.EAST;
-		gbc_lblName.gridx = 0;
-		gbc_lblName.gridy = 1;
-		getContentPane().add(lblName, gbc_lblName);
-
-	}
-
-	/**
-	 * Helper method to show ChildId
-	 */
-	private void setParent() {
-		// TODO Auto-generated method stub
 
 	}
 
@@ -295,12 +278,14 @@ public class OptionWindow extends JFrame {
 				try {
 					param = (ParamDescription[]) this.getParamMethod(cl).invoke(null);
 				} catch (Exception e) {
-					// TODO please handle if necessary, should not throw error.
+					// TO DO please handle if necessary, should not throw error.
 					e.printStackTrace();
 				}
 				operator.setOpClass(cl);
 			}
 		}
+
+		System.out.println("Show saved Parameters: " + param);
 
 		// Show the saved parameters in the GUI
 		int cnt = 3;

@@ -116,9 +116,11 @@ public final class NodeLink extends DefaultNodeLinkRenderpass<AnimatedPosition> 
 				if (secSel != null && secSel.getClass().equals(n.getClass())) {
 					// when selecting a second node create edge if they are of
 					// the same NiagarinoOperator Type
+					System.out.println("Creating Edge");
 					simpleView.addEdge(secSel, n);
 					secSel = null;
 					primSel = null;
+					return true;
 				} else if (secSel != null) {
 					// clicked on a node and a node was selected already but
 					// they are of different type. Reset selection and do
@@ -128,12 +130,14 @@ public final class NodeLink extends DefaultNodeLinkRenderpass<AnimatedPosition> 
 					return false;
 				} else {
 					// on right click select node if nothing is selected already
+
+					System.out.println("Selected: " + n);
 					secSel = n;
 					return true;
 				}
 			}
 		}
-
+		System.out.println(n);
 		// left mouse Button pressed
 		if (n == null) {
 			if (secSel instanceof Stream) {
@@ -158,6 +162,7 @@ public final class NodeLink extends DefaultNodeLinkRenderpass<AnimatedPosition> 
 			secSel = null;
 			return false;
 		} else if (n instanceof Stream && secSel instanceof Operator) {
+			System.out.println("New Operator should be created");
 			// when an Operator is selected and a Stream gets selected next
 			// create a new Operator
 			simpleView.addNode(new Operator((int) pos.getX(), (int) pos.getY()));
@@ -178,7 +183,7 @@ public final class NodeLink extends DefaultNodeLinkRenderpass<AnimatedPosition> 
 		NiagarinoOperators node = (NiagarinoOperators) pick(pos);
 		// On double right click remove the node
 		if (SwingUtilities.isRightMouseButton(e) && node != null) {
-			System.out.println(node.getID());
+			System.out.println("To be deleted: " + node.getID());
 			this.simpleView.removeNode(node);
 			primSel = null;
 			secSel = null;

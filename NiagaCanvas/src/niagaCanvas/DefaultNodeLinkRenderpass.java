@@ -278,27 +278,32 @@ public class DefaultNodeLinkRenderpass<T extends AnimatedPosition> extends Rende
 	private void renderEdges(final Graphics2D gfx, final KanvasContext ctx) {
 		final Rectangle2D visible = ctx.getVisibleCanvas();
 		final EdgeRealizer<T> edgeRealizer = getEdgeRealizer();
-		for (int i = 0; i < view.nodeCount(); ++i) {
-			final T from = view.getNode(i);
-			for (final int toId : view.edgesFrom(i)) {
+		for (final T from : this.view.nodes()) {
+			for (final int toId : this.view.edgesFrom(this.view.getId(from))) {
 
 				/*
-				 * TODO There is an issue here with directed edges if you remove
-				 * the node that is the target an error is thrown. Maybe there
-				 * is a check too much. Correct in SimpleNodeLinkView.
+				 * Check whether Node exists if not remove from edges set of
+				 * from node. TO DO There is an issue here with directed edges
+				 * if you remove the node that is the target an error is thrown.
+				 * Maybe there is a check too much. Correct in
+				 * SimpleNodeLinkView.
 				 */
+				if (this.view.getNode(toId) != null) {
+					final T to = this.view.getNode(toId);
 
-				final T to = view.getNode(toId);
+					final Shape edgeShape = edgeRealizer.createLineShape(from, to);
 
-				final Shape edgeShape = edgeRealizer.createLineShape(from, to);
-
-				if (!edgeShape.intersects(visible)) {
-					continue;
+					if (!edgeShape.intersects(visible)) {
+						continue;
+					}
+					final Graphics2D g = (Graphics2D) gfx.create();
+					g.setComposite(AlphaComposite.getInstance(2, 0.8f));
+					edgeRealizer.drawLines(g, edgeShape, from, to);
+					g.dispose();
+				} else {
+					this.view.removeEdge(this.view.getId(from), toId);
 				}
-				final Graphics2D g = (Graphics2D) gfx.create();
-				g.setComposite(AlphaComposite.getInstance(2, 0.8f));
-				edgeRealizer.drawLines(g, edgeShape, from, to);
-				g.dispose();
+
 			}
 		}
 	}

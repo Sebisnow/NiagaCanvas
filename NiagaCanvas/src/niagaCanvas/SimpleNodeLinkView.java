@@ -5,6 +5,7 @@ import java.util.BitSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import jkanvas.util.BitSetIterable;
 
@@ -42,17 +43,27 @@ public class SimpleNodeLinkView<NiagarinoOperators> implements NodeLinkView<Niag
 	}
 
 	@Override
-	public Iterable<NiagarinoOperators> nodes() {
+	public Set<NiagarinoOperators> nodes() {
 		return idMap.keySet();
 	}
 
+	/**
+	 * Checks in the idMap, where all nodes are saved with their ids, if there
+	 * is a node (key) with this id and returns it.
+	 * 
+	 * @param id
+	 *            The id of the node that should be reurned
+	 * 
+	 * @return Returns the Node with the specified id.
+	 */
 	@Override
 	public NiagarinoOperators getNode(final int id) {
 		for (NiagarinoOperators key : idMap.keySet()) {
 			if (idMap.get(key) == id)
 				return key;
 		}
-		// TODO maybe throw an error to give more info
+		// TODO maybe throw an error to give more info although null fares well
+		// so far
 		return null;
 	}
 
@@ -64,8 +75,6 @@ public class SimpleNodeLinkView<NiagarinoOperators> implements NodeLinkView<Niag
 	 * @return The corresponding id.
 	 */
 	public int getId(final NiagarinoOperators node) {
-		System.out.println("We want: " + node);
-		System.out.println("we have: + idMap");
 		return idMap.get(node);
 	}
 
@@ -91,8 +100,6 @@ public class SimpleNodeLinkView<NiagarinoOperators> implements NodeLinkView<Niag
 			throw new IllegalArgumentException("node " + node + " already added");
 
 		idMap.put(node, ((niagaCanvas.NiagarinoOperators) node).getID());
-		System.out.println(idMap.values());
-		// System.out.println("These are the nodes as idMap: " + nodes);
 		edges.put(idMap.get(node), new BitSet());
 		onChange();
 	}
@@ -103,15 +110,9 @@ public class SimpleNodeLinkView<NiagarinoOperators> implements NodeLinkView<Niag
 	}
 
 	@Override
-	public Iterable<Integer> edgesFrom(final int node) {
-		/*
-		 * TODO try node +1 for directed as well
-		 * 
-		 * ??? should have been solved by making edges Hashmap not ArrayList.
-		 */
+	public BitSetIterable edgesFrom(final int node) {
+
 		final int start = isDirected() ? 0 : node + 1;
-		// System.out.println("The start of the edge " + node + ", should be 0:
-		// " + start);
 		BitSet es = edges.get(node);
 		/*
 		 * TODO This non null assertion is only necessary, because on Operator
@@ -121,9 +122,8 @@ public class SimpleNodeLinkView<NiagarinoOperators> implements NodeLinkView<Niag
 		 */
 		if (es == null) {
 			es = new BitSet();
+
 		}
-		// System.out.println("The BitSet" + es + " of the edge, should be 0: "
-		// + start);
 
 		return new BitSetIterable(es, start);
 	}
@@ -164,27 +164,27 @@ public class SimpleNodeLinkView<NiagarinoOperators> implements NodeLinkView<Niag
 	 *            The second node.
 	 */
 	public void addEdge(final NiagarinoOperators from, final NiagarinoOperators to) {
-		// Only entities of the same class can be connected by an edge that are
-		// not yet connected.
-		// System.out.println("From: " + from.toString() + " to: " +
-		// to.toString() + "/n idMap: " + idMap.values());
+		// TODO only add edge if no connection exists yet. Meaning no child or
+		// parent.
+
+		int inval = niagaCanvas.NiagarinoOperators.INVALID;
 		if (!areConnected(getId(from), getId(to)))
 			if (from instanceof Operator && to instanceof Operator && to != from) {
-				addEdge(getId(from), getId(to));
-				((Operator) from).setChildID(((Operator) to).getID());
-				((Operator) to).setParentID(((Operator) from).getID());
-				// System.out.println("These are the edges as bitmaps: " +
-				// edges);
+				if (((Operator) from).getChildID() == inval && ((Operator) to).getParentID() == inval) {
+					addEdge(getId(from), getId(to));
+					((Operator) from).setChildID(((Operator) to).getID());
+					((Operator) to).setParentID(((Operator) from).getID());
 
-				onChange();
+					onChange();
+				}
 			} else if (from instanceof Stream && to instanceof Stream && to != from) {
-				addEdge(getId(from), getId(to));
-				((Stream) from).setChildID(((Stream) to).getID());
-				((Stream) to).setParentID(((Stream) from).getID());
-				// System.out.println("These are the edges as bitmaps: " +
-				// edges);
+				if (((Operator) from).getChildID() == inval && ((Operator) to).getParentID() == inval) {
+					addEdge(getId(from), getId(to));
+					((Stream) from).setChildID(((Stream) to).getID());
+					((Stream) to).setParentID(((Stream) from).getID());
 
-				onChange();
+					onChange();
+				}
 			}
 
 	}
@@ -216,11 +216,7 @@ public class SimpleNodeLinkView<NiagarinoOperators> implements NodeLinkView<Niag
 	 *            The destination node.
 	 */
 	public void removeEdge(final NiagarinoOperators from, final NiagarinoOperators to) {
-		/*
-		 * TODO There is an issue here with directed edges if you remove the
-		 * node that is the target an error is thrown. Maybe there is a check
-		 * too much. Correct in SimpleNodeLinkView.
-		 */
+
 		if (from instanceof Operator && to instanceof Operator) {
 			removeEdge(getId(from), getId(to));
 			((Operator) from).setChildID(niagaCanvas.NiagarinoOperators.INVALID);
@@ -247,10 +243,6 @@ public class SimpleNodeLinkView<NiagarinoOperators> implements NodeLinkView<Niag
 		if (!isDirected()) {
 			edges.get(to).clear(from);
 		}
-		// System.out.println("Removed Edge from " + from + " to " + to);
-		// System.out.println(edges);
-		// System.out.println("These are the nodes: " + nodes);
-		// System.out.println("This is the size: " + nodes.size());
 		onChange();
 	}
 
@@ -290,7 +282,7 @@ public class SimpleNodeLinkView<NiagarinoOperators> implements NodeLinkView<Niag
 			}
 			this.delDependencies((niagaCanvas.NiagarinoOperators) node);
 		} else if (node instanceof Stream) {
-			System.out.println(((Stream) node).getOperatorList());
+			// System.out.println(((Stream) node).getOperatorList());
 			for (Operator op : ((Stream) node).getOperatorList()) {
 				this.removeNode((NiagarinoOperators) op);
 			}

@@ -176,7 +176,6 @@ public class NiaXMLConverter {
 	 *            The current element to append the Stream to.
 	 */
 	private void writeStream(Stream stream, Document doc, Element root) {
-		System.out.println("Write Stream");
 		Element st = doc.createElement("Stream");
 		st.setAttribute("name", stream.name);
 
@@ -186,8 +185,7 @@ public class NiaXMLConverter {
 		}
 
 		if (stream.getOperatorList().size() > 0) {
-			System.out.println("Write Operator");
-			this.operatorSet = stream.getOperatorList();
+			this.operatorSet = new ArrayList<Operator>(stream.getOperatorList());
 			this.writeOperators(doc, st);
 		}
 		root.appendChild(st);
@@ -205,11 +203,9 @@ public class NiaXMLConverter {
 		NiagarinoOperators op;
 		if (iter.hasNext()) {
 			op = iter.next();
-			System.out.println("Had Next: " + op);
 
 			while (op.getParentID() != NiagarinoOperators.INVALID && iter.hasNext()) {
 				op = iter.next();
-				System.out.println("In the loop" + op);
 			}
 			return op;
 		} else {
@@ -232,7 +228,6 @@ public class NiaXMLConverter {
 	private void writeOperators(Document doc, Element stElem) {
 		Operator op = (Operator) this.getRoot(this.operatorSet.iterator());
 
-		System.out.println(op + " this and the name of operator " + op.name);
 		this.writeOneOperator(op, doc, stElem);
 
 		while (op.getChildID() != NiagarinoOperators.INVALID) {
@@ -257,10 +252,9 @@ public class NiaXMLConverter {
 	 */
 	private void writeOneOperator(Operator op, Document doc, Element stElem) {
 		this.operatorSet.remove(op);
-		System.out.println("WriteOneOperator->");
 		Element opElem = doc.createElement("Operator");
 		opElem.setAttribute("name", op.name);
-		opElem.setAttribute("class", op.getClass().getName());
+		opElem.setAttribute("class", op.properties.get("OperatorType"));
 
 		stElem.appendChild(opElem);
 
@@ -279,7 +273,6 @@ public class NiaXMLConverter {
 		 * {StringFunctionand AggregationFunction} are converted to functions.
 		 * 
 		 **/
-		System.out.println("The Iterator over that key set: " + op.attributes.keySet());
 		String type = null;
 		// write all attributes of the Operator.
 		while (it.hasNext()) {
