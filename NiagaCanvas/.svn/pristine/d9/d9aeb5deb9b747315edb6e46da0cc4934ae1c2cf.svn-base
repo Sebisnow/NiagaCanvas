@@ -171,7 +171,6 @@ public final class NodeLink extends DefaultNodeLinkRenderpass<AnimatedPosition> 
 		} else {
 			// e.g. stream selected and stream selected next on right click. Do
 			// nothing but reset everything.
-
 			secSel = null;
 			primSel = null;
 			return false;
@@ -193,7 +192,7 @@ public final class NodeLink extends DefaultNodeLinkRenderpass<AnimatedPosition> 
 		// Option window
 		if (node instanceof Stream) {
 
-			OptionWindow window = new OptionWindow((Stream) node, this.view, this);
+			OptionWindow window = new OptionWindow((Stream) node, this.view);
 			window.setVisible(true);
 
 			return true;
@@ -201,6 +200,17 @@ public final class NodeLink extends DefaultNodeLinkRenderpass<AnimatedPosition> 
 
 			OptionWindow window = new OptionWindow((Operator) node, this.view);
 			window.setVisible(true);
+			while (window.isVisible()) {
+				try {
+					wait(1);
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+			if (window.isSet) {
+				this.checkAllEdges();
+			}
 
 			return true;
 		}
@@ -243,12 +253,6 @@ public final class NodeLink extends DefaultNodeLinkRenderpass<AnimatedPosition> 
 					this.opList.put(op, pos);
 					op.clearAnimation();
 				}
-			}
-		} else if (n instanceof Operator) {
-			Operator op = (Operator) n;
-			Stream st = (Stream) this.view.getNode(op.getStreamID());
-			if (st.getEnd() == op || st.getStart() == op) {
-				return false;
 			}
 		}
 		primSel = n;

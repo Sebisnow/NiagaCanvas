@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<plan>
+  <schema name="">
+    <double name="lame" progressing="0"/>
+    <double name="fame" progressing="0"/>
+    <double name="same" progressing="0"/>
+    <double name="game" progressing="0"/>
+    <double name="blame" progressing="0"/>
+    <double name="shame" progressing="0"/>
+  </schema>
+  <Stream name="stareeehn">
+    <Operator class="niagacanvas.operator.TopK" name="Otopsi"/>
+    <Operator class="niagacanvas.operator.Selection" name="comp">
+      <object class="dsadasd" name="predicate"/>
+    </Operator>
+    <Operator class="niagacanvas.operator.Selection" name="sel">
+      <object class="time.equity" name="predicate"/>
+    </Operator>
+    <Operator class="niagacanvas.operator.Selection" name="lamb">
+      <object class="lambda.class.x" name="predicate"/>
+    </Operator>
+  </Stream>
+  <Stream name="next1" previous="stareeehn">
+    <Operator class="niagacanvas.operator.TopK" name="toppits"/>
+  </Stream>
+  <Stream name="next2" previous="stareeehn">
+    <Operator class="niagacanvas.operator.TopK" name="toppits"/>
+  </Stream>
+</plan>

@@ -2,10 +2,8 @@
 <plan>
   <schema name=""/>
   <Stream name="StreamID0">
-    <Operator class="" name="OperatorID2"/>
-    <Operator class="" name="OperatorID1"/>
-    <Operator class="" name="OperatorID4"/>
-    <Operator class="" name="OperatorID5"/>
-    <Operator class="" name="OperatorID3"/>
+    <Operator class="niagacanvas.operator.Selection" name="pred">
+      <object class="predsoclasso" name="predicate"/>
+    </Operator>
   </Stream>
 </plan>

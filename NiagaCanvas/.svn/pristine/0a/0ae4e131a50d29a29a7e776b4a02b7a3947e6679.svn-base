@@ -33,11 +33,6 @@ public class SimpleNodeLinkView<NiagarinoOperators> implements NodeLinkView<Niag
 	private final boolean isDirected;
 
 	/**
-	 * The node that is selected at the moment
-	 */
-	private NiagarinoOperators selected;
-
-	/**
 	 * Creates a simple node-link view.
 	 *
 	 * @param isDirected
@@ -45,7 +40,6 @@ public class SimpleNodeLinkView<NiagarinoOperators> implements NodeLinkView<Niag
 	 */
 	public SimpleNodeLinkView(final boolean isDirected) {
 		this.isDirected = isDirected;
-		this.selected = null;
 	}
 
 	@Override
@@ -172,103 +166,27 @@ public class SimpleNodeLinkView<NiagarinoOperators> implements NodeLinkView<Niag
 	public void addEdge(final NiagarinoOperators from, final NiagarinoOperators to) {
 		// TODO only add edge if no connection exists yet. Meaning no child or
 		// parent.
+
 		int inval = niagaCanvas.NiagarinoOperators.INVALID;
-		if (!areConnected(getId(from), getId(to))) {
+		if (!areConnected(getId(from), getId(to)))
 			if (from instanceof Operator && to instanceof Operator && to != from) {
 				if (((Operator) from).getChildID() == inval && ((Operator) to).getParentID() == inval) {
-					if (this.addEdge(getId(from), getId(to))) {
-						((Operator) from).setChildID(((Operator) to).getID());
-						((Operator) to).setParentID(((Operator) from).getID());
+					addEdge(getId(from), getId(to));
+					((Operator) from).setChildID(((Operator) to).getID());
+					((Operator) to).setParentID(((Operator) from).getID());
 
-						onChange();
-					}
+					onChange();
 				}
 			} else if (from instanceof Stream && to instanceof Stream && to != from) {
 				if (((Stream) from).getChildID() == inval && ((Stream) to).getParentID() == inval) {
-					if (this.addEdge(getId(from), getId(to))) {
-						((Stream) from).setChildID(((Stream) to).getID());
-						((Stream) to).setParentID(((Stream) from).getID());
+					addEdge(getId(from), getId(to));
+					((Stream) from).setChildID(((Stream) to).getID());
+					((Stream) to).setParentID(((Stream) from).getID());
 
-						onChange();
-					}
+					onChange();
 				}
 			}
-		}
 
-	}
-
-	/**
-	 * TODO this could throw errors to help keeping the user informed about what
-	 * went wrong.
-	 * 
-	 * Helper Method, that ensures that edges can only be created if the two
-	 * nodes in question fulfill the requirements.
-	 * 
-	 * A StartOperator can have no entries from any operators.
-	 * 
-	 * An EndOperator can have no exits to any operators.
-	 * 
-	 * All other Operators can only have one entry and one exit.
-	 * 
-	 * @param from
-	 *            Start of the candidate edge.
-	 * @param to
-	 *            End of the candidate Edge.
-	 * 
-	 * @return returns whether the Edge is allowed to be drawn or not.
-	 */
-	public boolean checkNodeProperties(NiagarinoOperators from1, NiagarinoOperators to1) {
-		if (from1 instanceof Operator && to1 instanceof Operator) {
-			// to increase readability and reduce redundancy
-			Operator to = (Operator) to1, from = (Operator) from1;
-			Stream st = (Stream) this.getNode(from.getStreamID());
-			if (st.getID() != to.getStreamID()) {
-				// The Operators are on different Streams, do not connect
-				System.out.println("diff Streams");
-				return false;
-			} else if (st.getStart() == to) {
-				// The ending Operator is the Start of the Stream.
-				System.out.println("to is start");
-				return false;
-			} else if (st.getEnd() == from) {
-				// The starting Operator is the End of the Stream.
-
-				System.out.println("from is end");
-				return false;
-			} else if (from.getParentID() == to.getID() || to.getChildID() == from.getID()) {
-				// Prevent Operators from being connected in both directions.
-				System.out.println("interconnection");
-				return false;
-			} else if (to.getParentID() != niagaCanvas.NiagarinoOperators.INVALID
-					|| from.getChildID() != niagaCanvas.NiagarinoOperators.INVALID) {
-				// Operators have this kind of connection already, then do not
-				// add edge.
-				if (this.areConnected(from.getID(), to.getID())) {
-					return true;
-				} else {
-
-					System.out.println(
-							"Parent or Child already present: " + from.getChildID() + " to: " + to.getParentID());
-					return false;
-				}
-			} else {
-
-				return true;
-			}
-		} else if (from1 instanceof Stream && to1 instanceof Stream) {
-			// to increase readability and reduce redundancy
-			Stream to = (Stream) to1, from = (Stream) from1;
-
-			if (from.getParentID() == to.getID() || to.getChildID() == from.getID()) {
-				// Prevent Streams from being connected in both directions.
-				System.out.println("interconnection of Streams");
-				return false;
-			} else {
-				return true;
-			}
-		} else {
-			return true;
-		}
 	}
 
 	/**
@@ -280,19 +198,13 @@ public class SimpleNodeLinkView<NiagarinoOperators> implements NodeLinkView<Niag
 	 * @param to
 	 *            The id of the second node.
 	 */
-	public boolean addEdge(final int from, final int to) {
-		boolean ok = this.checkNodeProperties(this.getNode(from), this.getNode(to));
-		if (ok) {
-			// checkIndex(from, to);
-			edges.get(from).set(to);
-			if (!isDirected()) {
-				edges.get(to).set(from);
-			}
-			System.out.println("Edge created : " + from + " " + to);
-			onChange();
-			return ok;
+	public void addEdge(final int from, final int to) {
+		// checkIndex(from, to);
+		edges.get(from).set(to);
+		if (!isDirected()) {
+			edges.get(to).set(from);
 		}
-		return ok;
+		onChange();
 	}
 
 	/**
@@ -327,13 +239,9 @@ public class SimpleNodeLinkView<NiagarinoOperators> implements NodeLinkView<Niag
 	 */
 	public void removeEdge(final int from, final int to) {
 		// checkIndex(from, to);
-		try {
-			edges.get(from).clear(to);
-			if (!isDirected()) {
-				edges.get(to).clear(from);
-			}
-		} catch (IndexOutOfBoundsException e) {
-			// Edge already removed, do nothing.
+		edges.get(from).clear(to);
+		if (!isDirected()) {
+			edges.get(to).clear(from);
 		}
 		onChange();
 	}
@@ -366,11 +274,12 @@ public class SimpleNodeLinkView<NiagarinoOperators> implements NodeLinkView<Niag
 		 * If node is an Operator delete reference to it in parent Stream. If
 		 * it's Stream then delete all Operators saved in the stream as well.
 		 **/
+
 		if (node instanceof Operator) {
-
-			((Stream) this.getNode(((Operator) node).getStreamID())).getOperatorList().remove(node);
-			((Operator) node).deleteStreamID();
-
+			if (((Operator) node).getStreamID() != niagaCanvas.NiagarinoOperators.INVALID) {
+				((Stream) this.getNode(((Operator) node).getStreamID())).getOperatorList().remove(node);
+				((Operator) node).deleteStreamID();
+			}
 			this.delDependencies((niagaCanvas.NiagarinoOperators) node);
 		} else if (node instanceof Stream) {
 			// System.out.println(((Stream) node).getOperatorList());
@@ -379,11 +288,11 @@ public class SimpleNodeLinkView<NiagarinoOperators> implements NodeLinkView<Niag
 			}
 		}
 		// remove all edges connecting the node
-		// for (NiagarinoOperators candidateNode : this.nodes()) {
-		// if (areConnected(getId(node), getId(candidateNode))) {
-		// removeEdge(node, candidateNode);
-		// }
-		// }
+		for (NiagarinoOperators candidateNode : this.nodes()) {
+			if (areConnected(getId(node), getId(candidateNode))) {
+				removeEdge(node, candidateNode);
+			}
+		}
 		idMap.remove(node);
 		nodes.remove(node);
 	}
@@ -454,34 +363,13 @@ public class SimpleNodeLinkView<NiagarinoOperators> implements NodeLinkView<Niag
 	 *            THe operator that will be freed of all parent or child
 	 *            dependencies.
 	 */
-	public void delDependencies(niagaCanvas.NiagarinoOperators node) {
-		int inval = niagaCanvas.NiagarinoOperators.INVALID;
-		if (((Operator) node).getChildID() != inval) {
-			this.removeEdge(((Operator) node).getID(), ((Operator) node).getChildID());
-			((Operator) this.getNode(((Operator) node).getChildID())).setParentID(inval);
+	public void delDependencies(niagaCanvas.NiagarinoOperators operator) {
+		int inv = niagaCanvas.NiagarinoOperators.INVALID;
+		if (operator.getChildID() != inv) {
+			((Operator) this.getNode(operator.getChildID())).setChildID(inv);
 		}
-		if (((Operator) node).getParentID() != inval) {
-			this.removeEdge(((Operator) node).getParentID(), ((Operator) node).getID());
-			((Operator) this.getNode(((Operator) node).getParentID())).setChildID(inval);
+		if (operator.getParentID() != inv) {
+			((Operator) this.getNode(operator.getParentID())).setParentID(inv);
 		}
-	}
-
-	/**
-	 * Getter
-	 * 
-	 * @return the selected
-	 */
-	public NiagarinoOperators getSelected() {
-		return selected;
-	}
-
-	/**
-	 * Setter
-	 * 
-	 * @param selected
-	 *            the selected to set
-	 */
-	public void setSelected(NiagarinoOperators selected) {
-		this.selected = selected;
 	}
 }

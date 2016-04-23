@@ -243,27 +243,12 @@ public class SimpleNodeLinkView<NiagarinoOperators> implements NodeLinkView<Niag
 					|| from.getChildID() != niagaCanvas.NiagarinoOperators.INVALID) {
 				// Operators have this kind of connection already, then do not
 				// add edge.
-				if (this.areConnected(from.getID(), to.getID())) {
-					return true;
-				} else {
 
-					System.out.println(
-							"Parent or Child already present: " + from.getChildID() + " to: " + to.getParentID());
-					return false;
-				}
-			} else {
-
-				return true;
-			}
-		} else if (from1 instanceof Stream && to1 instanceof Stream) {
-			// to increase readability and reduce redundancy
-			Stream to = (Stream) to1, from = (Stream) from1;
-
-			if (from.getParentID() == to.getID() || to.getChildID() == from.getID()) {
-				// Prevent Streams from being connected in both directions.
-				System.out.println("interconnection of Streams");
+				System.out
+						.println("Parent or Child already present: " + from.getChildID() + " to: " + to.getParentID());
 				return false;
 			} else {
+
 				return true;
 			}
 		} else {
@@ -366,11 +351,12 @@ public class SimpleNodeLinkView<NiagarinoOperators> implements NodeLinkView<Niag
 		 * If node is an Operator delete reference to it in parent Stream. If
 		 * it's Stream then delete all Operators saved in the stream as well.
 		 **/
+
 		if (node instanceof Operator) {
-
-			((Stream) this.getNode(((Operator) node).getStreamID())).getOperatorList().remove(node);
-			((Operator) node).deleteStreamID();
-
+			if (((Operator) node).getStreamID() != niagaCanvas.NiagarinoOperators.INVALID) {
+				((Stream) this.getNode(((Operator) node).getStreamID())).getOperatorList().remove(node);
+				((Operator) node).deleteStreamID();
+			}
 			this.delDependencies((niagaCanvas.NiagarinoOperators) node);
 		} else if (node instanceof Stream) {
 			// System.out.println(((Stream) node).getOperatorList());
@@ -379,11 +365,11 @@ public class SimpleNodeLinkView<NiagarinoOperators> implements NodeLinkView<Niag
 			}
 		}
 		// remove all edges connecting the node
-		// for (NiagarinoOperators candidateNode : this.nodes()) {
-		// if (areConnected(getId(node), getId(candidateNode))) {
-		// removeEdge(node, candidateNode);
-		// }
-		// }
+		for (NiagarinoOperators candidateNode : this.nodes()) {
+			if (areConnected(getId(node), getId(candidateNode))) {
+				removeEdge(node, candidateNode);
+			}
+		}
 		idMap.remove(node);
 		nodes.remove(node);
 	}
@@ -454,15 +440,13 @@ public class SimpleNodeLinkView<NiagarinoOperators> implements NodeLinkView<Niag
 	 *            THe operator that will be freed of all parent or child
 	 *            dependencies.
 	 */
-	public void delDependencies(niagaCanvas.NiagarinoOperators node) {
-		int inval = niagaCanvas.NiagarinoOperators.INVALID;
-		if (((Operator) node).getChildID() != inval) {
-			this.removeEdge(((Operator) node).getID(), ((Operator) node).getChildID());
-			((Operator) this.getNode(((Operator) node).getChildID())).setParentID(inval);
+	public void delDependencies(niagaCanvas.NiagarinoOperators operator) {
+		int inv = niagaCanvas.NiagarinoOperators.INVALID;
+		if (operator.getChildID() != inv) {
+			((Operator) this.getNode(operator.getChildID())).setChildID(inv);
 		}
-		if (((Operator) node).getParentID() != inval) {
-			this.removeEdge(((Operator) node).getParentID(), ((Operator) node).getID());
-			((Operator) this.getNode(((Operator) node).getParentID())).setChildID(inval);
+		if (operator.getParentID() != inv) {
+			((Operator) this.getNode(operator.getParentID())).setParentID(inv);
 		}
 	}
 

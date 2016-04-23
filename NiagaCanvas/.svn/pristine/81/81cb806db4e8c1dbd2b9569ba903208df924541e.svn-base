@@ -16,14 +16,15 @@ public class Stream extends NiagarinoOperators {
 	 */
 	private ArrayList<Operator> operatorList;
 	/**
-	 * The first Operator in the Stream. This Operator has a fixed position at
-	 * the top line of the Stream.
+	 * The first Operator in the Stream. This Operator can have multiple
+	 * parentIDs or has a fixed position at the top line of the Stream.
 	 */
 	private Operator start;
 
 	/**
-	 * The last Operator in the Stream. This Operator has a fixed position at
-	 * the bottom line of the Stream.
+	 * The last Operator in the Stream. This Operator can have multiple exit
+	 * points (childIDs) or has a fixed position at the bottom line of the
+	 * Stream.
 	 */
 	private Operator end;
 
@@ -97,8 +98,6 @@ public class Stream extends NiagarinoOperators {
 	 *            the start to set
 	 */
 	public void setStart(Operator start) {
-		if (this.end == start)
-			this.end = null;
 		this.start = start;
 	}
 
@@ -118,9 +117,7 @@ public class Stream extends NiagarinoOperators {
 	 *            the end to set
 	 */
 	public void setEnd(Operator end) {
-		if (this.start == end)
-			this.start = null;
-
 		this.end = end;
 	}
+
 }

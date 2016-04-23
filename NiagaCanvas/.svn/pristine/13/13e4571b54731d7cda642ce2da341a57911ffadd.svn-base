@@ -1,6 +1,7 @@
 package niagaCanvas;
 
 import java.awt.Button;
+import java.awt.Component;
 import java.awt.ComponentOrientation;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -33,70 +34,20 @@ import niagacanvas.operator.ParamDescription;
 import niagarino.operator.AbstractOperator;
 import niagarino.operator.predicate.Predicate;
 
-/**
- * This opens an Option Window for a NiagarinoOperator to set its values in a
- * GUI. To improve style implement as Modal JDialog like JOptionpane.
- * 
- * @author sebastian
- *
- */
 @SuppressWarnings("serial")
 public class OptionWindow extends JFrame {
-
-	/**
-	 * true if something has changed.
-	 * 
-	 */
-	@Deprecated
 	public boolean isSet;
-
-	/**
-	 * The Name of the Operator.
-	 */
 	public String name;
-
-	/**
-	 * Reference to a JTextField to be able to call it from without the specific
-	 * methods.
-	 */
 	private JTextField textField;
-
-	/**
-	 * Reference to a Creation Button to be able to call it from without the
-	 * specific methods.
-	 */
-	private JButton button;
-
-	/**
-	 * A NiagarinoOperator whose options are represented by this Window.
-	 */
 	private final NiagarinoOperators op;
-
-	/**
-	 * The Option Window itself
-	 */
 	private OptionWindow self;
-
-	/**
-	 * The current view to get all the view data.
-	 */
 	private SimpleNodeLinkView<AnimatedPosition> view;
-
-	/**
-	 * The NodeLink that initiated this Window, to allow access to
-	 * DefaultNodeLinkRenderpass and NodeLink.
-	 */
-	@SuppressWarnings("unused")
-	private NodeLink link;
 
 	/**
 	 * Create the panel for Stream.
 	 * 
-	 * @param nodeLink
-	 * 
 	 */
-	public OptionWindow(Stream operator, SimpleNodeLinkView<AnimatedPosition> view2, NodeLink link) {
-		this.link = link;
+	public OptionWindow(Stream operator, SimpleNodeLinkView<AnimatedPosition> view2) {
 		this.self = this;
 		this.view = view2;
 		this.op = operator;
@@ -166,6 +117,20 @@ public class OptionWindow extends JFrame {
 				}
 			}
 		}
+		startCombo.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+					if (e.getItem().equals(" ")) {
+						return;
+					}
+					String[] subStr = ((String) e.getItem()).split(" ");
+					operator.setStart((Operator) view.getNode(Integer.parseInt(subStr[0])));
+					checkStart(operator);
+					isSet = true;
+				}
+			}
+		});
 
 		GridBagConstraints gbc_start = new GridBagConstraints();
 		gbc_start.insets = new Insets(0, 0, 0, 5);
@@ -193,6 +158,21 @@ public class OptionWindow extends JFrame {
 				}
 			}
 		}
+		endCombo.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+					if (e.getItem().equals(" ")) {
+						return;
+					}
+
+					String[] subStr = ((String) e.getItem()).split(" ");
+					operator.setEnd((Operator) view.getNode(Integer.parseInt(subStr[0])));
+					isSet = true;
+					checkStart(operator);
+				}
+			}
+		});
 
 		GridBagConstraints gbc_end = new GridBagConstraints();
 		gbc_end.insets = new Insets(0, 0, 0, 5);
@@ -210,30 +190,13 @@ public class OptionWindow extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				String text = textField.getText().trim();
-				if (!text.equals("")) {
+				if (text.equals("")) {
 					op.name = text;
-				}
 
-				// evaluate the startCombo and set streams start.
-				if (startCombo.getSelectedItem().equals(" ")) {
-					operator.setStart(null);
-				} else {
-					String[] subStr = ((String) startCombo.getSelectedItem()).split(" ");
-					link.setStart(operator, (Operator) view.getNode(Integer.parseInt(subStr[0])));
 				}
-				// evaluate the endCombo and set streams end.
-				if (endCombo.getSelectedItem().equals(" ")) {
-					operator.setEnd(null);
-
-				} else {
-					String[] subStr = ((String) endCombo.getSelectedItem()).split(" ");
-					link.setEnd(operator, (Operator) view.getNode(Integer.parseInt(subStr[0])));
-				}
-
 				setVisible(false);
 			}
 		});
-
 		GridBagConstraints gbc_button = new GridBagConstraints();
 		gbc_button.insets = new Insets(0, 0, 0, 5);
 		gbc_button.anchor = GridBagConstraints.NORTH;
@@ -290,12 +253,12 @@ public class OptionWindow extends JFrame {
 		gbc_lblName.gridy = 0;
 		getContentPane().add(lblName, gbc_lblName);
 
-		this.button = new JButton("Create");
-		this.button.setName("create");
-		this.button.setFont(new Font("Dialog", Font.PLAIN, 15));
-		this.button.setPreferredSize(new Dimension(100, 40));
+		JButton button = new JButton("Create");
+		button.setName("create");
+		button.setFont(new Font("Dialog", Font.PLAIN, 15));
+		button.setPreferredSize(new Dimension(100, 40));
 
-		this.button.addActionListener(new ActionListener() {
+		button.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				op.name = textField.getText();
@@ -373,7 +336,7 @@ public class OptionWindow extends JFrame {
 		gbc_button.anchor = GridBagConstraints.NORTH;
 		gbc_button.gridx = 1;
 		gbc_button.gridy = getContentPane().getComponentCount() + 1;
-		getContentPane().add(this.button, gbc_button);
+		getContentPane().add(button, gbc_button);
 
 		this.pack();
 		this.setVisible(true);
@@ -389,26 +352,26 @@ public class OptionWindow extends JFrame {
 	 */
 	private void redrawOperator(String opName) {
 		Operator operator = (Operator) this.op;
+		JButton button = null;
 
 		// System.out.println(this.getContentPane().getComponents().length);
-		// for (Component c : this.getContentPane().getComponents()) {
-		//
-		// if (c instanceof JButton && c.getName().equals("create")) {
-		// button = (JButton) c;
-		// this.getContentPane().remove(c);
-		//
-		// } else if (c.getName() != null && c.getName().equals("Name")) {
-		//
-		// continue;
-		//
-		// } else {
-		// this.getContentPane().remove(c);
-		// }
-		// }
-		// if (button == null) {
-		// button = new JButton("save");
-		// button.setName("create");
-		// }
+		for (Component c : this.getContentPane().getComponents()) {
+
+			if (c instanceof JButton && c.getName().equals("create")) {
+				button = (JButton) c;
+				this.getContentPane().remove(c);
+
+			} else if (c.getName() != null && c.getName().equals("Name")) {
+
+				continue;
+
+			} else {
+				this.getContentPane().remove(c);
+			}
+		}
+		if (button != null) {
+			button.setName("create");
+		}
 
 		// TODO right size for this array? should be
 		ParamDescription[] param = new ParamDescription[10];
@@ -437,7 +400,7 @@ public class OptionWindow extends JFrame {
 			gbc_label.gridx = 0;
 			gbc_label.gridy = cnt;
 			gbc_label.anchor = GridBagConstraints.EAST;
-			this.getContentPane().add(label, gbc_label);
+			getContentPane().add(label, gbc_label);
 
 			operator.properties.put("ParamDescription", paramDesc.getName());
 			switch (paramDesc.getValueRange()) {
@@ -456,8 +419,13 @@ public class OptionWindow extends JFrame {
 				gbc_text.fill = GridBagConstraints.HORIZONTAL;
 				gbc_text.gridx = 1;
 				gbc_text.gridy = cnt;
-				this.getContentPane().add(text, gbc_text);
-				this.button.addActionListener(new ActionListener() {
+				getContentPane().add(text, gbc_text);
+				JButton save = new JButton("Save");
+				save.setName("save");
+				save.setFont(new Font("Dialog", Font.PLAIN, 15));
+				save.setPreferredSize(new Dimension(80, 20));
+
+				save.addActionListener(new ActionListener() {
 
 					@Override
 					public void actionPerformed(ActionEvent e) {
@@ -467,8 +435,13 @@ public class OptionWindow extends JFrame {
 						operator.attributes.put("String", predValues);
 					}
 				});
+				GridBagConstraints gbc_save = new GridBagConstraints();
+				gbc_save.insets = new Insets(0, 0, 5, 5);
+				gbc_save.fill = GridBagConstraints.HORIZONTAL;
+				gbc_save.gridx = 3;
+				gbc_save.gridy = cnt;
+				getContentPane().add(save, gbc_save);
 				cnt++;
-
 				break;
 			case ParamDescription.INT:
 				JTextField text1 = new JTextField(paramDesc.getName());
@@ -485,8 +458,13 @@ public class OptionWindow extends JFrame {
 				gbc_text1.fill = GridBagConstraints.HORIZONTAL;
 				gbc_text1.gridx = 1;
 				gbc_text1.gridy = cnt;
-				this.getContentPane().add(text1, gbc_text1);
-				this.button.addActionListener(new ActionListener() {
+				getContentPane().add(text1, gbc_text1);
+				JButton save1 = new JButton("Save");
+				save1.setName("save");
+				save1.setFont(new Font("Dialog", Font.PLAIN, 15));
+				save1.setPreferredSize(new Dimension(80, 20));
+
+				save1.addActionListener(new ActionListener() {
 
 					@Override
 					public void actionPerformed(ActionEvent e) {
@@ -501,6 +479,12 @@ public class OptionWindow extends JFrame {
 						}
 					}
 				});
+				GridBagConstraints gbc_save1 = new GridBagConstraints();
+				gbc_save1.insets = new Insets(0, 0, 5, 5);
+				gbc_save1.fill = GridBagConstraints.HORIZONTAL;
+				gbc_save1.gridx = 3;
+				gbc_save1.gridy = cnt;
+				getContentPane().add(save1, gbc_save1);
 				cnt++;
 
 				break;
@@ -508,24 +492,23 @@ public class OptionWindow extends JFrame {
 				JComboBox<String> box = new JComboBox<String>();
 				box.addItem("true");
 				box.addItem("false");
-				GridBagConstraints gbc_combo = new GridBagConstraints();
-				gbc_combo.insets = new Insets(0, 0, 5, 5);
-				gbc_combo.fill = GridBagConstraints.HORIZONTAL;
-				gbc_combo.gridx = 1;
-				gbc_combo.gridy = cnt;
-				this.getContentPane().add(box, gbc_combo);
-
-				this.button.addActionListener(new ActionListener() {
-
+				box.addItemListener(new ItemListener() {
 					@Override
-					public void actionPerformed(ActionEvent e) {
-						operator.properties.put(paramDesc.getName(), (String) box.getSelectedItem());
 
-						ArrayList<String> predValues = new ArrayList<String>();
-						predValues.add((String) box.getSelectedItem());
-						operator.attributes.put("Boolean", predValues);
+					public void itemStateChanged(ItemEvent e) {
+						if (e.getStateChange() == ItemEvent.SELECTED) {
+							operator.properties.put(paramDesc.getName(), (String) e.getItem());
+
+							ArrayList<String> predValues = new ArrayList<String>();
+							predValues.add((String) e.getItem());
+							operator.attributes.put("Boolean", predValues);
+						}
 					}
 				});
+				if (operator.properties.get(paramDesc.getName()) != null) {
+					box.setSelectedIndex(Integer.parseInt(operator.properties.get(paramDesc.getName())));
+				}
+
 				cnt++;
 
 				break;
@@ -544,14 +527,18 @@ public class OptionWindow extends JFrame {
 				gbc_text2.fill = GridBagConstraints.HORIZONTAL;
 				gbc_text2.gridx = 1;
 				gbc_text2.gridy = cnt;
-				this.getContentPane().add(text2, gbc_text2);
+				getContentPane().add(text2, gbc_text2);
+				JButton save2 = new JButton("Save");
+				save2.setName("save");
+				save2.setFont(new Font("Dialog", Font.PLAIN, 15));
+				save2.setPreferredSize(new Dimension(80, 20));
 
-				this.button.addActionListener(new ActionListener() {
+				save2.addActionListener(new ActionListener() {
 
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						operator.properties.put(paramDesc.getName(), text2.getText());
-						// TODO Working Rudimentary implementation. Receives one
+						// Functional Rudimentary implementation. Receives one
 						// Double as
 						// input.
 						ArrayList<String> predValues = new ArrayList<String>();
@@ -559,6 +546,13 @@ public class OptionWindow extends JFrame {
 						operator.attributes.put("Double", predValues);
 					}
 				});
+				GridBagConstraints gbc_save2 = new GridBagConstraints();
+				gbc_save2.insets = new Insets(0, 0, 5, 5);
+				gbc_save2.fill = GridBagConstraints.HORIZONTAL;
+				gbc_save2.gridx = 3;
+				gbc_save2.gridy = cnt;
+				getContentPane().add(save2, gbc_save2);
+
 				cnt++;
 
 				break;
@@ -577,19 +571,31 @@ public class OptionWindow extends JFrame {
 				gbc_text3.fill = GridBagConstraints.HORIZONTAL;
 				gbc_text3.gridx = 1;
 				gbc_text3.gridy = cnt;
-				this.getContentPane().add(text3, gbc_text3);
+				getContentPane().add(text3, gbc_text3);
+				JButton save3 = new JButton("Save");
+				save3.setName("save");
+				save3.setFont(new Font("Dialog", Font.PLAIN, 15));
+				save3.setPreferredSize(new Dimension(80, 20));
 
-				this.button.addActionListener(new ActionListener() {
+				save3.addActionListener(new ActionListener() {
+
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						operator.properties.put(paramDesc.getName(), text3.getText());
-						// TODO Working Rudimentary implementation. Receives one
-						// Long as input.
+						// Functional Rudimentary implementation. Receives one
+						// Long as
+						// input.
 						ArrayList<String> predValues = new ArrayList<String>();
 						predValues.add(text3.getText());
 						operator.attributes.put("Long", predValues);
 					}
 				});
+				GridBagConstraints gbc_save3 = new GridBagConstraints();
+				gbc_save3.insets = new Insets(0, 0, 5, 5);
+				gbc_save3.fill = GridBagConstraints.HORIZONTAL;
+				gbc_save3.gridx = 3;
+				gbc_save3.gridy = cnt;
+				getContentPane().add(save3, gbc_save3);
 				cnt++;
 
 				break;
@@ -611,7 +617,7 @@ public class OptionWindow extends JFrame {
 				gbc_box1.fill = GridBagConstraints.HORIZONTAL;
 				gbc_box1.gridx = 1;
 				gbc_box1.gridy = cnt;
-				this.getContentPane().add(box1, gbc_box1);
+				getContentPane().add(box1, gbc_box1);
 
 				JTextField text5 = new JTextField();
 				if (operator.properties.get(box1.getSelectedItem()) != null) {
@@ -625,9 +631,15 @@ public class OptionWindow extends JFrame {
 				gbc_text5.fill = GridBagConstraints.HORIZONTAL;
 				gbc_text5.gridx = 2;
 				gbc_text5.gridy = cnt;
-				this.getContentPane().add(text5, gbc_text5);
+				getContentPane().add(text5, gbc_text5);
 
-				this.button.addActionListener(new ActionListener() {
+				JButton saveBut = new JButton("Save");
+				saveBut.setName("save");
+				saveBut.setFont(new Font("Dialog", Font.PLAIN, 15));
+				saveBut.setPreferredSize(new Dimension(80, 20));
+
+				saveBut.addActionListener(new ActionListener() {
+
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						operator.properties.put((String) box1.getSelectedItem(), text5.getText());
@@ -640,6 +652,12 @@ public class OptionWindow extends JFrame {
 						operator.attributes.put("Predicate", predValues);
 					}
 				});
+				GridBagConstraints gbc_saveBut = new GridBagConstraints();
+				gbc_saveBut.insets = new Insets(0, 0, 5, 5);
+				gbc_saveBut.fill = GridBagConstraints.HORIZONTAL;
+				gbc_saveBut.gridx = 3;
+				gbc_saveBut.gridy = cnt;
+				getContentPane().add(saveBut, gbc_saveBut);
 				cnt++;
 
 				break;
@@ -659,9 +677,15 @@ public class OptionWindow extends JFrame {
 				gbc_text6.fill = GridBagConstraints.HORIZONTAL;
 				gbc_text6.gridx = 1;
 				gbc_text6.gridy = cnt;
-				this.getContentPane().add(text6, gbc_text6);
+				getContentPane().add(text6, gbc_text6);
 
-				this.button.addActionListener(new ActionListener() {
+				JButton saveBut1 = new JButton("Save");
+				saveBut1.setName("save");
+				saveBut1.setFont(new Font("Dialog", Font.PLAIN, 15));
+				saveBut1.setPreferredSize(new Dimension(80, 20));
+
+				saveBut1.addActionListener(new ActionListener() {
+
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						operator.properties.put(paramDesc.getName(), text6.getText());
@@ -675,6 +699,12 @@ public class OptionWindow extends JFrame {
 						operator.attributes.put("Group", predValues);
 					}
 				});
+				GridBagConstraints gbc_saveBut1 = new GridBagConstraints();
+				gbc_saveBut1.insets = new Insets(0, 0, 5, 5);
+				gbc_saveBut1.fill = GridBagConstraints.HORIZONTAL;
+				gbc_saveBut1.gridx = 3;
+				gbc_saveBut1.gridy = cnt;
+				getContentPane().add(saveBut1, gbc_saveBut1);
 				cnt++;
 
 				break;
@@ -694,8 +724,15 @@ public class OptionWindow extends JFrame {
 				gbc_text7.fill = GridBagConstraints.HORIZONTAL;
 				gbc_text7.gridx = 1;
 				gbc_text7.gridy = cnt;
-				this.getContentPane().add(text7, gbc_text7);
-				this.button.addActionListener(new ActionListener() {
+				getContentPane().add(text7, gbc_text7);
+
+				JButton saveBut2 = new JButton("Save");
+				saveBut2.setName("save");
+				saveBut2.setFont(new Font("Dialog", Font.PLAIN, 15));
+				saveBut2.setPreferredSize(new Dimension(80, 20));
+
+				saveBut2.addActionListener(new ActionListener() {
+
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						operator.properties.put(paramDesc.getName(), text7.getText());
@@ -714,6 +751,12 @@ public class OptionWindow extends JFrame {
 						operator.attributes.put("AggregationFunction", predValues);
 					}
 				});
+				GridBagConstraints gbc_saveBut2 = new GridBagConstraints();
+				gbc_saveBut2.insets = new Insets(0, 0, 5, 5);
+				gbc_saveBut2.fill = GridBagConstraints.HORIZONTAL;
+				gbc_saveBut2.gridx = 3;
+				gbc_saveBut2.gridy = cnt;
+				getContentPane().add(saveBut2, gbc_saveBut2);
 				cnt++;
 
 				break;
@@ -733,9 +776,15 @@ public class OptionWindow extends JFrame {
 				gbc_text8.fill = GridBagConstraints.HORIZONTAL;
 				gbc_text8.gridx = 1;
 				gbc_text8.gridy = cnt;
-				this.getContentPane().add(text8, gbc_text8);
+				getContentPane().add(text8, gbc_text8);
 
-				this.button.addActionListener(new ActionListener() {
+				JButton saveBut3 = new JButton("Save");
+				saveBut3.setName("save");
+				saveBut3.setFont(new Font("Dialog", Font.PLAIN, 15));
+				saveBut3.setPreferredSize(new Dimension(80, 20));
+
+				saveBut3.addActionListener(new ActionListener() {
+
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						operator.properties.put(paramDesc.getName(), text8.getText());
@@ -748,21 +797,28 @@ public class OptionWindow extends JFrame {
 						operator.attributes.put("StringFunction", predValues);
 					}
 				});
+				GridBagConstraints gbc_saveBut3 = new GridBagConstraints();
+				gbc_saveBut3.insets = new Insets(0, 0, 5, 5);
+				gbc_saveBut3.fill = GridBagConstraints.HORIZONTAL;
+				gbc_saveBut3.gridx = 3;
+				gbc_saveBut3.gridy = cnt;
+				getContentPane().add(saveBut3, gbc_saveBut3);
 				cnt++;
 				break;
 
 			default:
 				break;
 			}
+
+		}
+		if (button != null) {
 			GridBagConstraints gbc_button = new GridBagConstraints();
 			gbc_button.insets = new Insets(0, 0, 5, 5);
 			gbc_button.anchor = GridBagConstraints.NORTH;
 			gbc_button.gridx = 1;
 			gbc_button.gridy = cnt;
-			this.getContentPane().add(this.button, gbc_button);
-
+			getContentPane().add(button, gbc_button);
 		}
-
 		this.pack();
 		this.validate();
 		this.repaint();

@@ -135,14 +135,12 @@ public class DefaultNodeLinkRenderpass<T extends AnimatedPosition> extends Rende
 	 */
 	@SuppressWarnings("unchecked")
 	private void renderNodes(final Graphics2D gfx, final KanvasContext ctx) {
-		System.out.println("Start render");
 		final Rectangle2D visible = ctx.getVisibleCanvas();
 		final RectangularNodeRealizer<T> streamRealizer = new RectangularNodeRealizer<T>();
 		final DefaultNodeRealizer<T> operatorRealizer = new DefaultNodeRealizer<T>();
 		int count = 0, secCount = 0;
 
 		this.checkOperatorsStreamID();
-		this.checkAllEdges();
 
 		// no Stream on Canvas, create one.
 		if (this.view.getStreams().size() == 0) {
@@ -172,7 +170,7 @@ public class DefaultNodeLinkRenderpass<T extends AnimatedPosition> extends Rende
 			streamRealizer.drawNode(g, (T) node);
 			g.dispose();
 		}
-		System.out.println("OperatorIDs: " + this.view.getOperators());
+		// System.out.println("OperatorIDs: " + this.view.getOperators());
 		for (final Operator node : this.view.getOperators()) {
 			// System.out.println(" one Operator: " + node.getID());
 			ArrayList<Stream> intersectList = new ArrayList<Stream>();
@@ -198,25 +196,22 @@ public class DefaultNodeLinkRenderpass<T extends AnimatedPosition> extends Rende
 					g.setColor(Color.DARK_GRAY);
 				}
 				g.setComposite(AlphaComposite.getInstance(2, 1.0f));
+				Stream stream = (Stream) this.view.getNode(node.getStreamID());
+				final Shape streamShape = streamRealizer.createNodeShape((T) stream, stream.getX(), stream.getY());
 
-				// Stream stream = (Stream)
-				// this.view.getNode(node.getStreamID());
 				/*
 				 * If the node is the start node in the stream draw on upper
 				 * part of stream on the same position of the Stream but on the
 				 * smallest y value. If it is the end node do the same except
 				 * the position should be at the highest y value.
 				 */
-				// if (node == stream.getStart()) {
-				// double y = streamShape.getBounds2D().getMinY() + 1;
-				// node.setPosition(stream.getX(), y);
-				// System.out.println("Start repos");
-				// } else if (node == stream.getEnd()) {
-				// double y = streamShape.getBounds2D().getMaxY() - 1;
-				// node.setPosition(stream.getX(), y);
-				//
-				// System.out.println("End repos");
-				// }
+				if (node == stream.getStart()) {
+					double y = streamShape.getBounds2D().getMinY() + 1;
+					node.setPosition(stream.getX(), y);
+				} else if (node == stream.getEnd()) {
+					double y = streamShape.getBounds2D().getMaxY() - 1;
+					node.setPosition(stream.getX(), y);
+				}
 
 				operatorRealizer.drawNode(g, (T) node);
 				g.dispose();
@@ -288,7 +283,7 @@ public class DefaultNodeLinkRenderpass<T extends AnimatedPosition> extends Rende
 			for (final int toId : this.view.edgesFrom(this.view.getId(from))) {
 				if (!this.view.checkNodeProperties(from, this.view.getNode(toId))) {
 					// delete. ok? edges
-					this.view.removeEdge(from, this.view.getNode(toId));
+					this.view.removeEdge(((NiagarinoOperators) from).getID(), toId);
 				}
 			}
 		}
@@ -488,43 +483,6 @@ public class DefaultNodeLinkRenderpass<T extends AnimatedPosition> extends Rende
 		} else {
 			this.layout.getBoundingBox(rect);
 		}
-	}
-
-	/**
-	 * Sets the Start Operator for a Stream.
-	 * 
-	 * @param stream
-	 *            The Stream to modify the Start of.
-	 * @param operator
-	 *            The Operator to make the Start Operator.
-	 */
-	@SuppressWarnings("unchecked")
-	public void setStart(Stream stream, Operator operator) {
-		stream.setStart(operator);
-		final Shape streamShape = new RectangularNodeRealizer<T>().createNodeShape((T) stream, stream.getX(),
-				stream.getY());
-		double y = streamShape.getBounds2D().getMinY() + 1;
-		operator.setPosition(stream.getX(), y);
-		System.out.println(operator.getPos());
-
-	}
-
-	/**
-	 * Sets the End Operator for a Stream.
-	 * 
-	 * @param stream
-	 *            The Stream to modify the End of.
-	 * @param operator
-	 *            The Operator to make the End Operator.
-	 */
-	@SuppressWarnings("unchecked")
-	public void setEnd(Stream stream, Operator operator) {
-		stream.setEnd(operator);
-		final Shape streamShape = new RectangularNodeRealizer<T>().createNodeShape((T) stream, stream.getX(),
-				stream.getY());
-		double y = streamShape.getBounds2D().getMaxY() - 1;
-		operator.setPosition(stream.getX(), y);
-
 	}
 
 }

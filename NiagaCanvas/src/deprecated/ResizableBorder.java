@@ -1,4 +1,4 @@
-package niagaCanvas;
+package deprecated;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;

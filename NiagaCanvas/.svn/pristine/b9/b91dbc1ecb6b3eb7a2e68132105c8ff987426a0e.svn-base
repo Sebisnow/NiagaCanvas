@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 import jkanvas.Camera;
@@ -116,6 +117,7 @@ public final class NodeLink extends DefaultNodeLinkRenderpass<AnimatedPosition> 
 				if (secSel != null && secSel.getClass().equals(n.getClass())) {
 					// when selecting a second node create edge if they are of
 					// the same NiagarinoOperator Type
+					System.out.println("Creating Edge");
 					simpleView.addEdge(secSel, n);
 					secSel = null;
 					primSel = null;
@@ -131,7 +133,6 @@ public final class NodeLink extends DefaultNodeLinkRenderpass<AnimatedPosition> 
 					// on right click select node if nothing is selected already
 
 					System.out.println("Selected: " + n);
-					this.view.setSelected(n);
 					secSel = n;
 					return true;
 				}
@@ -148,7 +149,7 @@ public final class NodeLink extends DefaultNodeLinkRenderpass<AnimatedPosition> 
 				return true;
 			} else if (secSel instanceof Operator) {
 				// when an Operator is selected and nothing gets selected next
-				// do nothing
+				// create Operator
 				// simpleView.addNode(new Operator((int) pos.getX(), (int)
 				// pos.getY()));
 				primSel = null;
@@ -161,17 +162,16 @@ public final class NodeLink extends DefaultNodeLinkRenderpass<AnimatedPosition> 
 			secSel = null;
 			return false;
 		} else if (n instanceof Stream && secSel instanceof Operator) {
+			System.out.println("New Operator should be created");
 			// when an Operator is selected and a Stream gets selected next
 			// create a new Operator
 			simpleView.addNode(new Operator((int) pos.getX(), (int) pos.getY()));
-
 			primSel = null;
 			secSel = null;
 			return true;
 		} else {
 			// e.g. stream selected and stream selected next on right click. Do
 			// nothing but reset everything.
-
 			secSel = null;
 			primSel = null;
 			return false;
@@ -193,13 +193,13 @@ public final class NodeLink extends DefaultNodeLinkRenderpass<AnimatedPosition> 
 		// Option window
 		if (node instanceof Stream) {
 
-			OptionWindow window = new OptionWindow((Stream) node, this.view, this);
+			OptionWindow window = new OptionWindow(new JFrame(), (Stream) node);
 			window.setVisible(true);
 
 			return true;
 		} else if (node instanceof Operator) {
 
-			OptionWindow window = new OptionWindow((Operator) node, this.view);
+			OptionWindow window = new OptionWindow(new JFrame(), (Operator) node);
 			window.setVisible(true);
 
 			return true;
@@ -213,6 +213,8 @@ public final class NodeLink extends DefaultNodeLinkRenderpass<AnimatedPosition> 
 		final NiagarinoOperators n = (NiagarinoOperators) pick(p);
 		if (n == null)
 			return null;
+		// TODO also return the name of the Node if there is a node at p
+		// return NodeLink.getClassName(n)
 		return n.name.contains("ID") ? Integer.toString(n.getID()) : n.name + ": " + "ID: " + n.getID();
 
 	}
@@ -233,22 +235,13 @@ public final class NodeLink extends DefaultNodeLinkRenderpass<AnimatedPosition> 
 			return false;
 		// initialize node dragging
 		if (n instanceof Stream) {
-			Stream stream = (Stream) n;
 			this.opList.clear();
-			for (Operator op : stream.getOperatorList()) {
-				if (op.getStreamID() == stream.getID()) {
-					Integer[] pos = new Integer[2];
-					pos[0] = (int) op.getX();
-					pos[1] = (int) op.getY();
-					this.opList.put(op, pos);
-					op.clearAnimation();
-				}
-			}
-		} else if (n instanceof Operator) {
-			Operator op = (Operator) n;
-			Stream st = (Stream) this.view.getNode(op.getStreamID());
-			if (st.getEnd() == op || st.getStart() == op) {
-				return false;
+			for (AnimatedPosition op : ((Stream) n).getOperatorList()) {
+				Integer[] x = new Integer[2];
+				x[0] = (int) op.getX();
+				x[1] = (int) op.getY();
+				this.opList.put(op, x);
+				op.clearAnimation();
 			}
 		}
 		primSel = n;
@@ -266,6 +259,7 @@ public final class NodeLink extends DefaultNodeLinkRenderpass<AnimatedPosition> 
 				op.setPosition(this.opList.get(op)[0] + dx, this.opList.get(op)[1] + dy);
 			}
 		}
+
 		primSel.setPosition(startX + dx, startY + dy);
 	}
 
@@ -273,26 +267,32 @@ public final class NodeLink extends DefaultNodeLinkRenderpass<AnimatedPosition> 
 	public void endDrag(final Point2D start, final Point2D cur, final double dx, final double dy) {
 		// draw shape around the position and check whether that shape
 		// intersects the shape of another node
-		start.setLocation(this.startX + dx, this.startY + dy);
-		final AnimatedPosition st = this.pick(start);
-		final AnimatedPosition end = this.pickShape(start);
 
-		if (end instanceof Stream && st instanceof Operator) {
-			Stream stream = (Stream) end;
-			Operator operator = (Operator) st;
-			// Add Operator to the Stream
-			if (operator.getStreamID() != stream.getID()) {
-				((Stream) this.view.getNode(operator.getStreamID())).removeOperator(operator);
-
-				stream.addOperator(operator);
-				this.checkOperatorsStreamID();
-			}
-			// System.out.println(stream.getOperatorList());
-
-			this.drag(start, cur, dx, dy);
-			this.primSel = null;
+		final AnimatedPosition n = pickShape(cur);
+		if (pick(start) instanceof Operator && !(n instanceof Stream)) {
+			return;
 		}
 
+		if (n == null) {
+			drag(start, cur, dx, dy);
+			primSel = null;
+		} else if (n instanceof Stream) {
+			Stream stream = (Stream) n;
+			if (pick(cur) instanceof Operator) {
+				Operator startOperator = (Operator) pick(cur);
+
+				// Add Operator to the Stream
+				startOperator.setStreamID(stream);
+				if (!stream.getOperatorList().contains(startOperator)) {
+					System.out.println("Placed on Stream:");
+					stream.addOperator(startOperator);
+				}
+				System.out.println(stream.getOperatorList());
+
+				drag(start, cur, dx, dy);
+				primSel = null;
+			}
+		}
 	}
 
 	@Override
