@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <plan>
-  <schema name=""/>
-  <Stream name="StreamID0">
-    <Operator class="niagacanvas.operator.Selection" name="pred">
-      <object class="predsoclasso" name="predicate"/>
-    </Operator>
-  </Stream>
+    <schema name="starting..."/>
+    <Stream name="StreamID0">
+        <Operator class="" name="OperatorID1"/>
+    </Stream>
 </plan>

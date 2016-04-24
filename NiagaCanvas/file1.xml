@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<plan>
+  <schema name=""/>
+  <Stream name="StreamID0">
+    <Operator class="" name="OperatorID1"/>
+    <Operator class="" name="OperatorID4"/>
+  </Stream>
+  <Stream name="StreamID2">
+    <Operator class="" name="OperatorID5"/>
+    <Operator class="" name="OperatorID6"/>
+  </Stream>
+  <Stream name="StreamID3">
+    <Operator class="" name="OperatorID7"/>
+    <Operator class="" name="OperatorID8"/>
+  </Stream>
+</plan>
