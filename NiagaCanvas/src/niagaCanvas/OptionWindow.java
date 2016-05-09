@@ -1,6 +1,7 @@
 package niagaCanvas;
 
 import java.awt.Button;
+import java.awt.Component;
 import java.awt.ComponentOrientation;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -472,6 +473,7 @@ public class OptionWindow extends JFrame {
 				break;
 			case ParamDescription.INT:
 				JTextField text1 = new JTextField(paramDesc.getName());
+				text1.setName("text");
 
 				if (operator.properties.get(paramDesc.getName()) != null) {
 					text1.setText(operator.properties.get(paramDesc.getName()));
@@ -486,19 +488,39 @@ public class OptionWindow extends JFrame {
 				gbc_text1.gridx = 1;
 				gbc_text1.gridy = cnt;
 				this.getContentPane().add(text1, gbc_text1);
+				ArrayList<JTextField> textFields = new ArrayList<JTextField>();
+				for (Component comp : this.getContentPane().getComponents()) {
+
+					if (comp.getName() != null && comp.getName().equals("text")) {
+						textFields.add((JTextField) comp);
+					}
+				}
 				this.button.addActionListener(new ActionListener() {
 
 					@Override
 					public void actionPerformed(ActionEvent e) {
+
 						try {
+							// for (JTextField t : textFields) {
 							Integer.parseInt(text1.getText());
 							operator.properties.put(paramDesc.getName(), text1.getText());
 							ArrayList<String> predValues = new ArrayList<String>();
+
+							predValues.add(paramDesc.getName());
 							predValues.add(text1.getText());
-							operator.attributes.put("Boolean", predValues);
+							if (operator.attributes.containsKey("Int")) {
+								for (int i = 0; i < predValues.size(); i++) {
+									operator.attributes.get("Int").add(predValues.get(i));
+								}
+							} else {
+								operator.attributes.put("Int", predValues);
+							}
+							// }
+							// System.out.println(operator.attributes);
 						} catch (Exception ex) {
 							JOptionPane.showMessageDialog(self, "Only Integers please!");
 						}
+
 					}
 				});
 				cnt++;

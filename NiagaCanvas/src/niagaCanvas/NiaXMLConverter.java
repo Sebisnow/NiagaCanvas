@@ -139,7 +139,7 @@ public class NiaXMLConverter {
 
 			Element elem = doc.createElement(attribute[1]);
 			elem.setAttribute("name", attribute[0]);
-			if (attribute.length > 2)
+			if (attribute[2].equals("1"))
 				elem.setAttribute("progressing", attribute[2]);
 
 			schema.appendChild(elem);
@@ -357,7 +357,7 @@ public class NiaXMLConverter {
 				opElem.appendChild(string);
 				break;
 
-			case "boolean":
+			case "Boolean":
 				for (String att : attributes) {
 					string = doc.createElement("type");
 					string.appendChild(doc.createTextNode(att));
@@ -365,23 +365,21 @@ public class NiaXMLConverter {
 				opElem.appendChild(string);
 				break;
 
-			case "int":
-				for (String att : attributes) {
-					string = doc.createElement("type");
-					string.appendChild(doc.createTextNode(att));
+			case "Int":
+				for (int i = 0; i < attributes.size(); i += 2) {
+					string = doc.createElement(attributes.get(i));
+					string.setTextContent(attributes.get(i + 1));
+					opElem.appendChild(string);
 				}
+				break;
+
+			case "Double":
+				string = doc.createElement(attributes.get(0));
+				string.setTextContent(attributes.get(1));
 				opElem.appendChild(string);
 				break;
 
-			case "double":
-				for (String att : attributes) {
-					string = doc.createElement("type");
-					string.appendChild(doc.createTextNode(att));
-				}
-				opElem.appendChild(string);
-				break;
-
-			case "long":
+			case "Long":
 				for (String att : attributes) {
 					string = doc.createElement("type");
 					string.appendChild(doc.createTextNode(att));
@@ -392,8 +390,8 @@ public class NiaXMLConverter {
 			case "Predicate":
 
 				string = doc.createElement("object");
-				string.setAttribute("name", "predicate");
-				string.setAttribute("class", attributes.get(1));
+				string.setAttribute("name", attributes.get(1));
+				string.setAttribute("class", attributes.get(0));
 				// What kind of predicate is never specified in the XML,
 				// would be attributes.get(0).
 				opElem.appendChild(string);

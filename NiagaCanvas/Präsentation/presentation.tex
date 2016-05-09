@@ -1,0 +1,238 @@
+% $Header: /Users/joseph/Documents/LaTeX/beamer/solutions/generic-talks/generic-ornate-15min-45min.de.tex,v 90e850259b8b 2007/01/28 20:48:30 tantau $
+
+\documentclass{beamer}
+
+% Diese Datei enthält eine Lösungsvorlage für:
+
+
+% - Vorträge über ein beliebiges Thema.
+% - Vortragslänge zwischen 15 und 45 Minuten. 
+% - Aussehen des Vortrags ist verschnörkelt/dekorativ.
+
+
+
+% Copyright 2004 by Till Tantau <tantau@users.sourceforge.net>.
+%
+% In principle, this file can be redistributed and/or modified under
+% the terms of the GNU Public License, version 2.
+%
+% However, this file is supposed to be a template to be modified
+% for your own needs. For this reason, if you use this file as a
+% template and not specifically distribute it as part of a another
+% package/program, I grant the extra permission to freely copy and
+% modify this file as you see fit and even to delete this copyright
+% notice. 
+
+
+
+\mode<presentation>
+{
+  \usetheme{PaloAlto}
+  \usecolortheme{seahorse}
+  % oder ...
+  
+  % Items bleiben unsichtbar bis Sie aufgedeckt werden
+  \setbeamercovered{invisible}
+  % oder auch nicht
+}
+
+
+\usepackage[german]{babel}
+% oder was auch immer
+
+\usepackage[latin1]{inputenc}
+% oder was auch immer
+
+\usepackage{times}
+\usepackage[T1]{fontenc}
+% Oder was auch immer. Zu beachten ist, das Font und Encoding passen
+% müssen. Falls T1 nicht funktioniert, kann man versuchen, die Zeile
+% mit fontenc zu löschen.
+
+
+
+% % Mieser Hack für größere Zeilenabstände
+\newlength{\wideitemsep}
+\setlength{\wideitemsep}{\itemsep}
+\addtolength{\wideitemsep}{10pt}
+\let\olditem\item
+\renewcommand{\item}{\setlength{\itemsep}{\wideitemsep}\olditem}
+
+\title[NiagarUI] % (optional, nur bei langen Titeln nötig)
+{NiagarUI}
+
+\vskip10pt
+\subtitle{Bachelor Projekt -- WS 15/16}
+\vskip35pt
+\author[] % (optional, nur bei vielen Autoren)
+{Sebastian Schneider }
+% - Der \inst{?} Befehl sollte nur verwendet werden, wenn die Autoren
+%   unterschiedlichen Instituten angehören.
+
+%\institute % (optional, aber oft nötig)
+%{
+%  \inst{1}%
+%  Institut für Informatik\\
+%  Universität Hier
+%  \and
+%  \inst{2}%
+%  Institut für theoretische Philosophie\\
+%  Universität Dort}
+% - Der \inst{?} Befehl sollte nur verwendet werden, wenn die Autoren
+%   unterschiedlichen Instituten angehören.
+% - Keep it simple, niemand interessiert sich für die genau Adresse.
+
+\date{10. Mai 2016}
+
+
+%\subject{Informatik}
+% Dies wird lediglich in den PDF Informationskatalog einfügt. Kann gut
+% weggelassen werden.
+
+
+% Falls eine Logodatei namens "university-logo-filename.xxx" vorhanden
+% ist, wobei xxx ein von latex bzw. pdflatex lesbares Graphikformat
+% ist, so kann man wie folgt ein Logo einfügen:
+
+\pgfdeclareimage[height=25pt, width=43pt]{logo}{UniLogo.jpg}
+\logo{\pgfuseimage{logo}}
+
+
+
+% Folgendes sollte gelöscht werden, wenn man nicht am Anfang jedes
+% Unterabschnitts die Gliederung nochmal sehen möchte.
+%\AtBeginSubsection[]
+%{
+%  \begin{frame}<beamer>{Gliederung}
+%    \tableofcontents[currentsection,currentsubsection]
+%  \end{frame}
+%}
+
+
+% Falls Aufzählungen immer schrittweise gezeigt werden sollen, kann
+% folgendes Kommando benutzt werden:
+
+\beamerdefaultoverlayspecification{<+->}
+
+
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\section{Motivation für NiagarUI}
+
+\subsection{NiagarUI}
+\begin{frame}{Warum NiagarUI?}
+	\begin{itemize}
+		\item<+-> Vereinfachte Erstellung von Plänen
+		
+	\end{itemize}
+\end{frame}
+\begin{frame}{Warum NiagarUI?}
+	Bisher wird niagarino der Plan per XML gefüttert
+\end{frame}
+\begin{frame}{Warum NiagarUI?}
+	\begin{itemize}
+		\item Vereinfachte Erstellung von Plänen
+		\item Veranschaulichung der Zusammenhänge eines Planes
+		
+	\end{itemize}
+\end{frame}
+\begin{frame}{Warum NiagarUI?}
+	Benutzerfreundliche spezifikation
+\end{frame}
+
+\begin{frame}{Warum NiagarUI?}
+	\begin{itemize}
+		\item Vereinfachte Erstellung von Plänen
+		\item Veranschaulichung der Zusammenhänge eines Planes
+		\item NiagarUI ist ein cooler Name
+		
+	\end{itemize}
+\end{frame}
+
+
+
+
+\begin{frame}{Geplanter Rahmen des Projektes}
+	\begin{itemize}
+		\item 
+		\item 
+		\item 
+	\end{itemize}
+\end{frame}
+
+\section{Umsetzung}
+\subsection{Aufgetretene Schwierigkeiten}
+\begin{frame}{Aufgetretene Schwierigkeiten}
+	\begin{itemize}
+		\item 
+		\item 
+		\item 
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Einschränkung des Projektrahmens}
+	\begin{itemize}
+		\item 
+		\item 
+		\item 
+	\end{itemize}
+\end{frame}
+\subsection{Proof of Concept}
+\begin{frame}{Proof of Concept?}
+	\begin{itemize}
+		\item 
+		\item 
+		\item 
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Proof of Concept!}
+	\begin{itemize}
+		\item Zwei Operatoren ausgewählt, um Machbarkeit, Prinzip und Weg zu veranschaulichen
+		\item 
+		\item 
+		%TODO go into Code to show ParamDescriptions and Annotations 
+	\end{itemize}
+\end{frame}
+
+\section{Ausblick}
+\begin{frame}{Vom Proof of Concept zu funktionstüchtiger Umsetzung}
+	
+	\begin{itemize}
+		\item Alle Operatoren integrieren
+		\begin{itemize}[<+->]
+			\item Annotationen zu allen Operatoren hinzufügen
+			\item Zwei statische Methoden pro Operator erstellen die den Operator beschreiben
+			\item Definieren wie spezielle Attribute (Functions, Group) implementiert und in XML übersetzt werden sollen
+		\end{itemize}
+		
+		\item Benutzeroberfläche verschönern
+		
+		\item Nutzerhandbuch
+		
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Ausblick}
+	
+	\begin{itemize}
+		\item XML-Pläne einlesen
+		
+		\item Wenn wir Reflections bereits nutzen, warum dann nicht gleich Plan in niagarino ausführen?
+		
+		\item Dynamische Elemente mit einbauen -> Visualisierung der Arbeit der Operatoren direkt in GUI
+		
+	\end{itemize}
+\end{frame}
+\section{Example Workflow}
+\begin{frame}{Beispiel}
+	An der Wallstreet soll ...	
+
+\end{frame}
+
+\end{document}

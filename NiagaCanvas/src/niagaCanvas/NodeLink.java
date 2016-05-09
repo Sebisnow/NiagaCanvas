@@ -134,7 +134,6 @@ public final class NodeLink extends DefaultNodeLinkRenderpass<AnimatedPosition> 
 				} else {
 					// on right click select node if nothing is selected already
 
-					System.out.println("Selected: " + n);
 					this.view.setSecSel(n);
 					secSel = n;
 					return true;
@@ -285,7 +284,7 @@ public final class NodeLink extends DefaultNodeLinkRenderpass<AnimatedPosition> 
 		}
 		this.primSel.setPosition(startX + dx, startY + dy);
 		AnimatedPosition node = this.pickShape(this.primSel.getPos());
-		System.out.println("Pos of PrimSel: " + this.primSel.getPos());
+		// System.out.println("Pos of PrimSel: " + this.primSel.getPos());
 		if (node instanceof Stream) {
 			this.secSel = node;
 			this.view.setSecSel(node);
@@ -306,15 +305,17 @@ public final class NodeLink extends DefaultNodeLinkRenderpass<AnimatedPosition> 
 		if (end instanceof Stream && st instanceof Operator) {
 			Stream stream = (Stream) end;
 			Operator operator = (Operator) st;
-			System.out.println(stream.getID() + " Stream " + stream.getPos());
-			System.out.println(operator.getStreamID() + " operators StreamID " + operator.getPos());
-
-			System.out.println(this.primSel + " The primary selection");
-			System.out.println(this.secSel + " The Sec selection");
+			// System.out.println(stream.getID() + " Stream " +
+			// stream.getPos());
+			// System.out.println(operator.getStreamID() + " operators StreamID
+			// " + operator.getPos());
+			//
+			// System.out.println(this.primSel + " The primary selection");
+			// System.out.println(this.secSel + " The Sec selection");
 
 			// Add Operator to the Stream
 			if (operator.getStreamID() != stream.getID()) {
-				System.out.println("Adding");
+				// System.out.println("Adding");
 				((Stream) this.view.getNode(operator.getStreamID())).removeOperator(operator);
 
 				stream.addOperator(operator);
@@ -323,13 +324,13 @@ public final class NodeLink extends DefaultNodeLinkRenderpass<AnimatedPosition> 
 			// System.out.println(stream.getOperatorList());
 
 			this.drag(start, cur, dx, dy);
-			this.primSel = null;
-
-			this.view.setPrimSel(null);
 		}
 		this.primSel = null;
 
 		this.view.setPrimSel(null);
+		this.secSel = null;
+
+		this.view.setSecSel(null);
 
 	}
 

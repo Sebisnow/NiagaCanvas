@@ -292,7 +292,7 @@ public class SimpleNodeLinkView<NiagarinoOperators> implements NodeLinkView<Niag
 	 *            The id of the second node.
 	 */
 	public boolean addEdge(final int from, final int to) {
-		System.out.println("trying to conn");
+		// System.out.println("trying to conn");
 		boolean ok = this.checkNodeProperties(this.getNode(from), this.getNode(to));
 		if (ok) {
 			// checkIndex(from, to);
@@ -300,7 +300,7 @@ public class SimpleNodeLinkView<NiagarinoOperators> implements NodeLinkView<Niag
 			if (!isDirected()) {
 				edges.get(to).set(from);
 			}
-			System.out.println("Edge created : " + from + " " + to);
+			// System.out.println("Edge created : " + from + " " + to);
 			onChange();
 			return ok;
 		}
