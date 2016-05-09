@@ -1,0 +1,26 @@
+package aPrototype;
+
+import javax.swing.SwingUtilities;
+
+public final class GUILauncher {
+	  
+	  /** Default database size (in pages). */
+	  private static final int DB_SIZE = 1000;
+
+	  /** Default buffer pool size (in pages). */
+	  private static final int BUFFER_SIZE = 10;
+	  
+	  /** Utility class. */
+	  private GUILauncher() { }
+	  
+	  /**
+	   * Creates DB and starts the GUI.
+	   * @param args 
+	   *           Not used.
+	   * @throws Exception 
+	   *           if something goes wrong
+	   */
+	  public static void main(final String[] args) throws Exception {
+	     SwingUtilities.invokeLater(() -> { new NiaGUI(); });
+	 }
+}

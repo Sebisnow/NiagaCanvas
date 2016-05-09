@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Copy element &apos;NiaXMLConverter.java&apos; to &apos;NiagaCanvas/src/niagaCanvas&apos;&#x0A;- Original project: &apos;NiagarUI&apos;&#x0A;- Destination element: &apos;NiagaCanvas/src/niagaCanvas&apos;&#x0A;- Original element: &apos;ui.util.NiaXMLConverter.java&apos;" description="Copy compilation unit" destination="=NiagaCanvas/src&lt;niagaCanvas" element1="/src&lt;ui.util{NiaXMLConverter.java" files="0" flags="589830" folders="0" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyResources" stamp="1460035924480" units="1" version="1.0"/>
+</session>

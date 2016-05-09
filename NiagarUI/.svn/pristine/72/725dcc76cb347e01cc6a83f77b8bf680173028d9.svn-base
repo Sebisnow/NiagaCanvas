@@ -1,0 +1,1 @@
+<schema><plan id="1" parent="1"><Stream id="4" parent="1"><Operator id="2" parent="4"></Operator><Scan id="3" parent="4"></Scan><Operator id="6" parent="4"></Operator><Operator id="8" parent="4"></Operator></Stream></plan></schema>

@@ -1,0 +1,261 @@
+package aPrototype;
+
+import java.awt.Color;
+import java.awt.Shape;
+import java.awt.event.MouseEvent;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.awt.geom.RectangularShape;
+
+import javax.swing.JFrame;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
+import javax.swing.SwingUtilities;
+
+import jkanvas.Camera;
+import jkanvas.Canvas;
+import jkanvas.animation.AnimatedPosition;
+import jkanvas.nodelink.NodeRealizer;
+import jkanvas.nodelink.layout.CircleLayouter;
+import jkanvas.nodelink.layout.RandomLayouter;
+import jkanvas.nodelink.layout.SimpleLayoutedView;
+import jkanvas.optional.MDSLayouter;
+import jkanvas.painter.RenderpassPainter;
+
+/**
+ * A small node-link example application.
+ * 
+ * @author Sebastian
+ */
+public final class NodeLink extends DefaultNodeLinkRenderpass<AnimatedPosition> {
+
+	/** The color for no selection. */
+	private static final Color NO_SEL = new Color(247, 247, 247);
+
+	/** The color for primary selection. */
+	private static final Color PRIM_SEL = new Color(202, 0, 32);
+
+	/** The color for secondary selection. */
+	private static final Color SEC_SEL = new Color(5, 113, 176);
+
+	/** The simple view in order to add nodes dynamically. */
+	private final SimpleLayoutedView<AnimatedPosition> simpleView;
+
+	/** The Canvas this Renderpass is associated with */
+
+	/**
+	 * Creates a node-link diagram.
+	 * 
+	 * @param view
+	 *            The view on the graph.
+	 */
+	public NodeLink(final SimpleLayoutedView<AnimatedPosition> view, Canvas c) {
+		super(view, c.getBounds());
+		simpleView = view;
+
+		setIds("nl");
+
+	}
+
+	@Override
+	protected void processMessage(final String msg) {
+		switch (msg) {
+		case "random":
+			simpleView.setLayouter(new RandomLayouter<>());
+			break;
+		case "circle":
+			simpleView.setLayouter(new CircleLayouter<>());
+			break;
+		case "mds": {
+			// estimate node size
+			final Shape s = getNodeRealizer().createNodeShape(view.getNode(0), 0, 0);
+			final double radius = s.getBounds2D().getWidth() * 0.5;
+			simpleView.setLayouter(new MDSLayouter<>(radius));
+			break;
+		}
+		}
+	}
+
+	/**
+	 * Getter.
+	 * 
+	 * @param node
+	 *            The node.
+	 * @return The color of the node.
+	 */
+	public Color getNodeColor(final AnimatedPosition node) {
+		return primSel == node ? PRIM_SEL : (secSel == node ? SEC_SEL : NO_SEL);
+	}
+
+	/** The primary selection. */
+	private AnimatedPosition primSel;
+
+	/** The start x position of the current drag. */
+	private double startX;
+
+	/** The start y position of the current drag. */
+	private double startY;
+
+	/** The secondary selection. */
+	private AnimatedPosition secSel;
+
+	@Override
+	public boolean click(final Camera cam, final Point2D pos, final MouseEvent e) {
+
+		final AnimatedPosition n = pick(pos);
+		if (SwingUtilities.isRightMouseButton(e)) {
+			if (n == null) {
+				// TODO call a popup
+				addFrame(e);
+				return false;
+			} else {
+
+				if (secSel != null) {
+					// when selecting a second node create edge
+					simpleView.addEdge(secSel, n);
+					secSel = null;
+				} else {
+					// select node
+					secSel = n;
+				}
+				return true;
+			}
+
+			// return false;
+		}
+		if (n == null) {
+
+			if (secSel instanceof Stream) {
+				// when a Stream is selected and nothing gets selected next
+				// create
+				// Stream
+				simpleView.addNode(new Stream((int) pos.getX(), (int) pos.getY()));
+				secSel = null;
+				return true;
+			} else if (secSel instanceof Operator) {
+				// when a Operator is selected and nothing gets selected next
+				// create
+				// Operator
+				simpleView.addNode(new Operator((int) pos.getX(), (int) pos.getY()));
+				secSel = null;
+				return true;
+			}
+			// no node selected
+			return false;
+
+			// TODO on double click open a window with options
+			// } else if(SwingUtilities.) {
+			//
+			// }
+		}
+		return false;
+
+	}
+
+	@Override
+	public boolean doubleClick(final Camera cam, final Point2D pos, final MouseEvent e) {
+		NiagarinoOperators node = (NiagarinoOperators) pick(pos);
+		if (node instanceof Stream) {
+
+			OptionWindow window = new OptionWindow(new JFrame());
+			window.setVisible(true);
+
+			return true;
+
+		}
+		return false;
+
+	}
+
+	// TODO remove after test
+	public void addFrame(MouseEvent e) {
+		// JFrame optionFrame = new JFrame();
+		// optionFrame.setSize(200, 200);
+		//
+		// optionFrame.setLocation((int) canvas.getPositionOnCanvas(e).getX(),
+		// (int) canvas.getPositionOnCanvas(e).getY());
+		// optionFrame.setVisible(true);
+		// optionFrame.setAlwaysOnTop(true);
+		// JTextArea text = new JTextArea();
+		// optionFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		Canvas c = (Canvas) e.getComponent();
+		JPopupMenu pop = new JPopupMenu();
+		pop.add(new JMenuItem("This is a Menu Item"));
+		pop.addSeparator();
+		pop.setLocation(e.getX(), e.getY());
+		pop.show(c, e.getX(), e.getY());
+		c.add(pop);
+
+	}
+
+	@Override
+	public String getTooltip(final Point2D p) {
+		final NiagarinoOperators n = (NiagarinoOperators) pick(p);
+		if (n == null)
+			return null;
+		// TODO also return the name of the Node if there is a node at p
+		return NodeLink.getClassName(n) + " " + n.name;
+
+	}
+
+	public static String getClassName(Object o) {
+		String classString = o.getClass().getName();
+		int dotIndex = classString.lastIndexOf(".");
+		return classString.substring(dotIndex + 1);
+	}
+
+	@Override
+	public boolean acceptDrag(final Point2D p, final MouseEvent e) {
+		if (!SwingUtilities.isLeftMouseButton(e)) {
+
+			return false;
+		}
+		final AnimatedPosition n = pick(p);
+		if (n == null)
+			return false;
+		// initialize node dragging
+		primSel = n;
+		primSel.clearAnimation();
+		startX = primSel.getX();
+		startY = primSel.getY();
+		return true;
+	}
+
+	@Override
+	public void drag(final Point2D start, final Point2D cur, final double dx, final double dy) {
+		primSel.setPosition(startX + dx, startY + dy);
+	}
+
+	@Override
+	public void endDrag(final Point2D start, final Point2D cur, final double dx, final double dy) {
+		final AnimatedPosition n = pick(cur);
+		if (n == null) {
+			drag(start, cur, dx, dy);
+			primSel = null;
+		} else if (n instanceof Stream) {
+			n = (Stream) n;
+			n.addOperator((NiagarinoOperators) pick(start));
+		}
+	}
+
+	@Override
+	public void getBoundingBox(final RectangularShape bbox) {
+		final NodeRealizer<AnimatedPosition> n = getNodeRealizer();
+		bbox.setFrame(0, 0, 0, 0);
+		for (final AnimatedPosition p : view.nodes()) {
+			final double x = p.getX();
+			final double y = p.getY();
+			final Shape shape = n.createNodeShape(p, x, y);
+			final Rectangle2D b = shape.getBounds2D();
+			RenderpassPainter.addToRect(bbox, b);
+			// include the end of the animation in the bounding box
+			if (p.inAnimation()) {
+				final double px = p.getPredictX();
+				final double py = p.getPredictY();
+				final Shape endShape = n.createNodeShape(p, px, py);
+				RenderpassPainter.addToRect(bbox, endShape.getBounds2D());
+			}
+		}
+	}
+
+}

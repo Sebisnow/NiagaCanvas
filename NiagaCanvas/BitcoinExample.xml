@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<plan>
+    <schema name="Bitcoin fees">
+        <int name="Size"/>
+        <int name="Date"/>
+        <int name="ConfTime"/>
+        <int name="IP"/>
+        <double name="Input"/>
+        <double name="Output"/>
+    </schema>
+    <Stream name="Source">
+        <Operator class="" name="Scan"/>
+        <Operator class="" name="Multi"/>
+    </Stream>
+    <Stream name="BitcoinSelector" previous="Source">
+        <Operator class="niagacanvas.operator.Selection" name="Bitcoin Selector">
+            <object class="ComparisonPredicate" name="4&gt;=1"/>
+        </Operator>
+        <Operator class="" name="MultiSelect"/>
+    </Stream>
+    <Stream name="AllFees" previous="Source">
+        <Operator class="" name="SumFees"/>
+        <Operator class="" name="Print"/>
+    </Stream>
+    <Stream name="FeesGtBTC" previous="BitcoinSelector">
+        <Operator class="" name="SumFees"/>
+        <Operator class="" name="Print"/>
+    </Stream>
+    <Stream name="Highscore" previous="BitcoinSelector">
+        <Operator class="niagacanvas.operator.TopK" name="Top">
+            <attributePosition>4</attributePosition>
+            <k>100</k>
+        </Operator>
+        <Operator class="" name="Print"/>
+    </Stream>
+</plan>

@@ -1,0 +1,75 @@
+/**
+ * 
+ */
+package aPrototype;
+
+import java.util.ArrayList;
+
+import jkanvas.Canvas;
+import jkanvas.animation.AnimatedPosition;
+import jkanvas.nodelink.layout.SimpleLayoutedView;
+import jkanvas.painter.Renderpass;
+
+/**
+ * @author sebastian
+ * @param <T>
+ *
+ */
+public class Stream extends NiagarinoOperators {
+
+	public Resizable res;
+
+	private ArrayList<Operator> operatorList;
+
+	/**
+	 * Constructor sets up a Stream Node
+	 * 
+	 */
+	public Stream(int x, int y) {
+		this(x, y, (int) IDGenerator.createID());
+	}
+
+	private Stream(int x, int y, int createdID) {
+		super(x, y, createdID);
+		this.operatorList = new ArrayList<Operator>();
+		this.name = "Stream";
+		this.resizable = true;
+		// res = new Resizable(area);
+		// res.setBounds(50, 50, 200, 150);
+		// this.add(res);
+		//
+		// addMouseListener(new MouseAdapter() {
+		// @Override
+		// public void mousePressed(MouseEvent me) {
+		//
+		// requestFocus();
+		// res.repaint();
+		// }
+		// });
+
+	}
+
+	@SuppressWarnings("unchecked")
+	public static void addStream(Canvas c, int x, int y) {
+		SimpleLayoutedView<AnimatedPosition> view = new SimpleLayoutedView<AnimatedPosition>(c, true);
+		NodeLink r = new NodeLink(view, c);
+		r.setNodeRealizer(new RectangularNodeRealizer<AnimatedPosition>());
+		view.addNode(new Stream(x, y));
+		Renderpass pass = ;
+		c.pass.addPass(r);
+
+	}
+
+	public ArrayList<Operator> getOperatorList() {
+		return operatorList;
+	}
+
+	public void addOperator(Operator operator) {
+		this.operatorList.add(operator);
+	}
+
+	public void removeOperator(Operator operator) {
+		this.operatorList.remove(operator);
+	}
+
+}

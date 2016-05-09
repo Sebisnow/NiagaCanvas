@@ -1,0 +1,47 @@
+/**
+ * 
+ */
+package aPrototype;
+
+import java.awt.event.MouseAdapter;
+import java.util.ArrayList;
+
+/**
+ * @author sebastian
+ * @param <T>
+ *
+ */
+public class Stream extends NiagarinoOperators {
+
+	public Resizable res;
+
+	private ArrayList<NiagarinoOperators> operatorList;
+
+	/**
+	 * Constructor sets up a Stream Node
+	 * 
+	 */
+	public Stream(int x, int y) {
+		this(x, y, (int) IDGenerator.createID());
+	}
+
+	private Stream(int x, int y, int createdID) {
+		super(x, y, createdID);
+		this.operatorList = new ArrayList<NiagarinoOperators>();
+		this.name = "Stream";
+
+	}
+
+	public ArrayList<NiagarinoOperators> getOperatorList() {
+		return operatorList;
+	}
+
+	public void addOperator(Operator operator) {
+		this.operatorList.add(operator);
+	}
+
+	public void removeOperator(Operator operator) {
+		this.operatorList.remove(operator);
+	}
+
+}

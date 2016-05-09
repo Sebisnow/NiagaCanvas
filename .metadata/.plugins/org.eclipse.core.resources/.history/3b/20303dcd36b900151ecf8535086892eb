@@ -1,0 +1,25 @@
+package aPrototype;
+
+public final class GUILauncher {
+	  
+	  /** Default database size (in pages). */
+	  private static final int DB_SIZE = 1000;
+
+	  /** Default buffer pool size (in pages). */
+	  private static final int BUFFER_SIZE = 10;
+	  
+	  /** Utility class. */
+	  private GUILauncher() { }
+	  
+	  /**
+	   * Creates DB and starts the GUI.
+	   * @param args 
+	   *           Not used.
+	   * @throws Exception 
+	   *           if something goes wrong
+	   */
+	  public static void main(final String[] args) throws Exception {
+	     final Minibase minibase = new Minibase("minibase", DB_SIZE, BUFFER_SIZE, ReplacementStrategy.CLOCK, false);
+	     SwingUtilities.invokeLater(() -> { new GraphicalUI(minibase); });
+	 }
+	}`

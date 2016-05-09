@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename type &apos;ui.util.JOptionPaneTest&apos; to &apos;PopupOptions&apos;&#x0A;- Original project: &apos;NiagarUI&apos;&#x0A;- Original element: &apos;ui.util.JOptionPaneTest&apos;&#x0A;- Renamed element: &apos;ui.util.PopupOptions&apos;&#x0A;- Update references to refactored element&#x0A;- Update textual occurrences in comments and strings" description="Rename type &apos;JOptionPaneTest&apos;" flags="589830" id="org.eclipse.jdt.ui.rename.type" input="/src&lt;ui.util{PopupOptions.java[JOptionPaneTest" matchStrategy="1" name="PopupOptions" qualified="false" references="true" similarDeclarations="false" stamp="1448876590951" textual="false" version="1.0"/>
+</session>

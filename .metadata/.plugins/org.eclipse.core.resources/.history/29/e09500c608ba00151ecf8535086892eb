@@ -1,0 +1,94 @@
+package aPrototype;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import jkanvas.nodelink.IndexedPosition;
+
+public abstract class NiagarinoOperators extends IndexedPosition {
+	private int index;
+	HashMap<String, Integer> properties;
+	ArrayList<IndexedPosition> elements;
+	public static final int INVALID = -1;
+	private int inputID;
+	private int outputID;
+	private int parentID;
+	String name;
+	public boolean resizable;
+
+	public NiagarinoOperators(double x, double y, int index) {
+		super(x, y, index);
+
+		this.inputID = NiagarinoOperators.INVALID;
+		this.outputID = NiagarinoOperators.INVALID;
+		this.properties = new HashMap<String, Integer>();
+		this.elements = new ArrayList<IndexedPosition>();
+		this.parentID = NiagarinoOperators.INVALID;
+		this.name = "";
+		this.creationWindow();
+		this.resizable = false;
+	}
+
+	private void creationWindow() {
+		EditorUI editorFrame = ProtoNia.frame;
+	}
+
+	public int getIndex() {
+		return this.index;
+	}
+
+	/**
+	 * @return the properties
+	 */
+	public HashMap<String, Integer> getProperties() {
+		return properties;
+	}
+
+	/**
+	 * @param properties
+	 *            the properties to set
+	 */
+	public void setProperties(HashMap<String, Integer> properties) {
+		this.properties = properties;
+	}
+
+	/**
+	 * @return the elements
+	 */
+	public ArrayList<IndexedPosition> getElements() {
+		return elements;
+	}
+
+	/**
+	 * @param elements
+	 *            the elements to set
+	 */
+	public void setElements(ArrayList<IndexedPosition> elements) {
+		this.elements = elements;
+	}
+
+	public int getInputID() {
+		return inputID;
+	}
+
+	public void setInputID(int inputID) {
+		this.inputID = inputID;
+	}
+
+	public int getOutputID() {
+		return outputID;
+	}
+
+	public void setOutputID(int outputID) {
+		this.outputID = outputID;
+	}
+
+	public int getParentID() {
+		return parentID;
+	}
+
+	public void setParentID(int parentID) {
+		this.parentID = parentID;
+	}
+
+}

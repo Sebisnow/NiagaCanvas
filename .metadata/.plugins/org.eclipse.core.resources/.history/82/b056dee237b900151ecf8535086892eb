@@ -1,0 +1,9 @@
+package aPrototype;
+
+public class NiaGUI {
+	
+	public NiaGUI(){
+		
+	}
+
+}

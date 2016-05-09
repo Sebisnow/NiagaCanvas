@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<item value="0" key="org.eclipse.egit.ui.internal.clone.GitSelectWizardPageWizardSel"/>
+	<list key="RepositorySelectionPage.UsedUris">
+		<item value="https://github.com/JosuaKrause/JKanvas.git"/>
+		<item value="https://github.com/jgrapht/jgrapht.git"/>
+		<item value="https://github.com/DBIS-UniKN/niagarino.git"/>
+		<item value="https://github.com/jgraph/jgraphx.git"/>
+		<item value="https://github.com/NiagarUI/jgrapht.git"/>
+	</list>
+	<section name="GitImportWizard">
+		<item value="true" key="GitProjectsImportPage.STORE_NESTED_PROJECTS"/>
+	</section>
+</section>

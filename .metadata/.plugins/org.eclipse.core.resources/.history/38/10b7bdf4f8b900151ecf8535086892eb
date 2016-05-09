@@ -1,0 +1,196 @@
+/**
+ * 
+ */
+package aPrototype;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.awt.geom.Point2D;
+
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.KeyStroke;
+
+import jkanvas.Canvas;
+import jkanvas.animation.AnimatedPosition;
+import jkanvas.nodelink.layout.SimpleLayoutedView;
+
+/**
+ * @author sebastian
+ *
+ */
+public class EditorUI extends JFrame {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private Canvas c;
+	public String name;
+
+	private JSplitPane splitPane;
+
+	/**
+	 * 
+	 */
+	public EditorUI(Canvas c) {
+		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		this.setTitle("starting...");
+
+		// TODO uncomment for start Window
+		// StartWindow s = new StartWindow(this);
+		//
+		// // name = s.name;
+		// // System.out.println("Getting " + s.name);
+		//
+		// name = s.getSchemaName();
+		// s.dispose();
+
+		System.out.println("Getting there.......");
+
+		this.c = c;
+		this.setTitle(name == null ? "NiagarZUI" : name);
+
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setName("Scroll");
+		scrollPane.setMinimumSize(new Dimension(100, 600));
+		this.splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, scrollPane, c);
+		this.splitPane.setName("SplitPane");
+
+		this.add(this.splitPane);
+
+		this.setJMenuBar(this.createMenuBar(new JMenuBar()));
+		this.pack();
+		this.setVisible(true);
+
+	}
+
+	public JMenuBar createMenuBar(JMenuBar menuBar) {
+		// create a Menu entry
+		JMenu menu = new JMenu("Menu");
+
+		// with subentries save . . . exit
+		JMenuItem saveitem = new JMenuItem("Save");
+		saveitem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK));
+
+		JMenuItem exititem = new JMenuItem("Exit");
+		exititem.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.exit(1);
+			}
+		});
+		exititem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, InputEvent.CTRL_MASK));
+
+		menu.add(saveitem);
+		menu.add(exititem);
+
+		// add the created menu with its items to the menubar
+		menuBar.add(menu);
+
+		JMenu edit = new JMenu("Edit");
+		JMenuItem stream = createStreamItem();
+		stream.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_MASK));
+		edit.add(stream);
+
+		JMenuItem operatoritem = new JMenuItem("New Operator");
+		operatoritem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.CTRL_MASK));
+
+		edit.add(operatoritem);
+		JMenuItem scanitem = new JMenuItem("New Scan");
+		scanitem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_MASK));
+
+		edit.add(scanitem);
+		menuBar.add(edit);
+
+		menuBar.setBackground(new Color(200, 200, 200));
+		menuBar.setVisible(true);
+		return menuBar;
+
+	}
+
+	/**
+	 * Generates A Menu Entry to create a new Stream
+	 * 
+	 * @return the menu Item
+	 */
+	public JMenuItem createStreamItem() {
+		JMenuItem streamitem = new JMenuItem("New Stream");
+		streamitem.setText("Stream");
+		streamitem.addActionListener(new ActionListener() {
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				final SimpleLayoutedView<AnimatedPosition> view = new SimpleLayoutedView<>(c, true);
+				// TODO not working yet
+				// creates a subclass of NodeLinkRenderpass
+				NodeLink r = new NodeLink(view, c);
+				r.setNodeRealizer(new RectangularNodeRealizer<AnimatedPosition>());
+				view.addNode(new Stream(200, 150));
+				r.setVisible(true);
+
+			}
+
+		});
+		return streamitem;
+	}
+
+	/**
+	 * Generates A Menu Entry to create a new Operator
+	 * 
+	 * @return the menu Item
+	 */
+	public JMenuItem createOperatorItem() {
+		JMenuItem operatoritem = new JMenuItem("Operator");
+		operatoritem.setText("Operator");
+
+		operatoritem.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JMenuItem item = (JMenuItem) e.getSource();
+				item.getParent();
+				System.out.println(e.getSource());
+			}
+
+		});
+		return operatoritem;
+	}
+
+	public void clickNoNode(MouseEvent e, Point2D pos) {
+		JPopupMenu pop = new JPopupMenu();
+		JMenuItem stream = createStreamItem();
+		pop.add(stream);
+		pop.show(e.getComponent(), (int) pos.getX(), (int) pos.getY());
+
+	}
+
+	public Canvas getC() {
+		return c;
+	}
+
+	public void setC(Canvas c) {
+		this.c = c;
+	}
+
+	public JSplitPane getSplitPane() {
+		return splitPane;
+	}
+
+	public void setSplitPane(JSplitPane splitPane) {
+		this.splitPane = splitPane;
+	}
+
+}

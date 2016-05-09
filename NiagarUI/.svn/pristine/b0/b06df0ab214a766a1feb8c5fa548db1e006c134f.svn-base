@@ -1,0 +1,463 @@
+package ui.util;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.DefaultHandler;
+
+public class NiaXMLConverter extends DefaultHandler {
+
+	/**
+	 * @param ids
+	 *            List of Lists which saves triples of the properties of xml:
+	 *            id, parent, name for future reference and parent finding
+	 * 
+	 */
+	private ArrayList<ArrayList<String>> ids;
+	/**
+	 * @param idMap
+	 *            stores the data of each node or id
+	 */
+	private HashMap<Integer, ArrayList<String>> idMap;
+
+	/**
+	 * @param NAMES
+	 *            stores the Names of the Operators in use
+	 */
+
+	private final List<String> NAMES = Arrays.asList("stream", "operator", "scan", "print", "window", "aggregate");
+	/**
+	 * @param string
+	 *            this is the Object to store the result in as a String
+	 */
+	private StringBuilder string;
+	/**
+	 * @param children
+	 *            contains a list of children for each parent node
+	 */
+	private HashMap<Integer, ArrayList<Integer>> children;
+	/**
+	 * @param root
+	 *            stores the current root when constructing the tree for XML
+	 */
+	private int root;
+	/**
+	 * @param edges
+	 *            stores the edges with its source and target as tuple
+	 */
+	private HashMap<Integer, Integer> edges;
+
+	/**
+	 * Initialize variables
+	 * 
+	 */
+	public void startDocument() throws SAXException {
+		this.idMap = new HashMap<Integer, ArrayList<String>>();
+		this.string = new StringBuilder();
+		this.ids = new ArrayList<ArrayList<String>>();
+		this.children = new HashMap<Integer, ArrayList<Integer>>();
+		this.root = 1;
+		this.edges = new HashMap<Integer, Integer>();
+	}
+
+	/**
+	 * This is the main part of the SAX parser where the vertex data is saved in
+	 * the idMap and the edges are stored in edges
+	 * 
+	 */
+	public void startElement(String namespaceURI, String localName, String qName, Attributes atts) throws SAXException {
+
+		switch (localName) {
+		case "mxCell":
+			// find all edges and save them to the edges Map
+			if (atts.getQName(0).equals("edge")) {
+				this.edges.put(Integer.parseInt(atts.getValue("source")), Integer.parseInt(atts.getValue("target")));
+
+			} else if (atts.getValue("value") == null) {
+				// if there is no part in xml file with the name value do not
+				// consider the part further
+				break;
+
+			} else {
+				// Check if the current value is one of the operators saved in
+				// NAMES if that is the case we save it's id, parent and the
+				// Name in the idMap with the corresponding id
+				for (String i : this.NAMES) {
+					if (atts.getValue("value").equals(i)) {
+
+						ArrayList<String> temp = new ArrayList<String>();
+						temp.add(atts.getValue(0));
+						temp.add(atts.getValue(1));
+						temp.add(i);
+						this.ids.add(temp);
+						this.idMap.put(Integer.parseInt(atts.getValue(0)), temp);
+
+					}
+
+				}
+			}
+
+			// else if (atts.getValue("value").equals(this.NAMES.get(0))) {
+			//
+			// ArrayList<String> temp = new ArrayList<String>();
+			// temp.add(atts.getValue(0));
+			// temp.add(atts.getValue(1));
+			// temp.add(this.NAMES.get(0));
+			// this.ids.add(temp);
+			// this.idMap.put(Integer.parseInt(atts.getValue(0)), temp);
+			//
+			// } else if (atts.getValue("value").equals(this.NAMES.get(1))) {
+			//
+			// ArrayList<String> temp = new ArrayList<String>();
+			// temp.add(atts.getValue(0));
+			// temp.add(atts.getValue(1));
+			// temp.add(this.NAMES.get(1));
+			// this.ids.add(temp);
+			// this.idMap.put(Integer.parseInt(atts.getValue(0)), temp);
+			//
+			// } else if (atts.getValue("value").equals(this.NAMES.get(2))) {
+			//
+			// ArrayList<String> temp = new ArrayList<String>();
+			// temp.add(atts.getValue(0));
+			// temp.add(atts.getValue(1));
+			// temp.add(this.NAMES.get(2));
+			// this.ids.add(temp);
+			// this.idMap.put(Integer.parseInt(atts.getValue(0)), temp);
+			//
+			// } else if (atts.getValue("value").equals(this.NAMES.get(3))) {
+			//
+			// ArrayList<String> temp = new ArrayList<String>();
+			// temp.add(atts.getValue(0));
+			// temp.add(atts.getValue(1));
+			// temp.add(this.NAMES.get(3));
+			// this.ids.add(temp);
+			// this.idMap.put(Integer.parseInt(atts.getValue(0)), temp);
+			//
+			// } else if (atts.getValue("value").equals(this.NAMES.get(4))) {
+			//
+			// ArrayList<String> temp = new ArrayList<String>();
+			// temp.add(atts.getValue(0));
+			// temp.add(atts.getValue(1));
+			// temp.add(this.NAMES.get(4));
+			// this.ids.add(temp);
+			// this.idMap.put(Integer.parseInt(atts.getValue(0)), temp);
+			// } else if (atts.getValue("value").equals(this.NAMES.get(5))) {
+			//
+			// ArrayList<String> temp = new ArrayList<String>();
+			// temp.add(atts.getValue(0));
+			// temp.add(atts.getValue(1));
+			// temp.add(this.NAMES.get(5));
+			// this.ids.add(temp);
+			// this.idMap.put(Integer.parseInt(atts.getValue(0)), temp);
+			// }
+
+			break;
+
+		case "mxGraphModel":
+
+			ArrayList<String> temp = new ArrayList<String>();
+			temp.add("1");
+			temp.add("1");
+			temp.add("plan");
+			this.ids.add(temp);
+			this.idMap.put(1, temp);
+
+			break;
+
+		case "root":
+			this.string.append("<schema>");
+			break;
+
+		default:
+			break;
+
+		}
+
+	}
+
+	/**
+	 * 
+	 */
+	@Override
+	// public void endElement(String uri, String localName, String qName) throws
+	// SAXException {
+	//
+	// switch (localName) {
+	// case "mxCell":
+	// // does last parent correspond to id of
+	// // if (ids.get(ids.size() - 1).get(1).equals(ids.get(ids.size() -
+	// // 2).get(0)))
+	// // string.append(ids.get(ids.size() - 1).get(2));
+	// // else {
+	// // for (int i = ids.size() - 2; i >= 0; i--) {
+	// // if (ids.get(ids.size() - 1).get(0).equals(ids.get(i)))
+	// // string.append(ids.get(ids.size() - 1).get(2));
+	// // }
+	// //
+	// // }
+	//
+	// // string.append("<stream>");
+	// // try {
+	// //
+	// // if (list.get(list.size() - 1).equals("Operator")) {
+	// // for (List temp : ids) {
+	// // temp.get(1).equals(ids.get(ids.size() - 1));
+	// // temp.contains(ids.get(ids.size() - 1).get(1));
+	// // }
+	// // list.remove(list.size() - 1);
+	// // ids.remove(ids.size() - 1);
+	// // string.append("</Operator>");
+	// // } else if (list.get(list.size() - 1).equals("Stream")
+	// // && ids.get(ids.size() - 1).get(1).equals("Stream")) {
+	// // list.remove(list.size() - 1);
+	// // ids.remove(ids.size() - 1);
+	// // string.append("</Stream>");
+	// // } else if (list.get(list.size() - 1).equals("Scan") &&
+	// // ids.get(ids.size() - 1).get(1).equals("Scan")) {
+	// // list.remove(list.size() - 1);
+	// // ids.remove(ids.size() - 1);
+	// // string.append("</Scan>");
+	// // } else {
+	// // string.append(ids.get(ids.size() - 1).get(1));
+	// // ids.remove(ids.size() - 1);
+	// // }
+	// //// break;
+	// // } catch (ArrayIndexOutOfBoundsException e) {
+	// // break;
+	// // }
+	// break;
+	//
+	// case "mxGraphModel":
+	// // string.append("</plan>");
+	// break;
+	//
+	// case "root":
+	// // string.append("</schema>");
+	// break;
+	//
+	// default:
+	// break;
+	//
+	// }
+	//
+	// }
+
+	/**
+	 * After the whole document has been parsed the new document can be created
+	 * with the saved data and calls the mapChildren method to sort the nodes
+	 * 
+	 */
+	public void endDocument() throws SAXException {
+
+		// extract all parents and save in a set
+		SortedSet<Integer> parents = new TreeSet<Integer>();
+		for (int i : this.idMap.keySet()) {
+			parents.add(Integer.parseInt(this.idMap.get(i).get(1)));
+		}
+
+		mapChildren(parents);
+		sortChildren();
+
+		if (!parents.isEmpty()) {
+			recursion(parents.first());
+		}
+		this.string.append("</" + this.idMap.get(root).get(2) + ">");
+
+		this.string.append("</schema>");
+
+		for (int i : this.edges.keySet()) {
+			this.string.append(i + " ");
+			this.string.append(this.edges.get(i) + " ");
+		}
+
+		System.out.println(this.string.toString());
+	}
+
+	/**
+	 * TODO consider edges for the mapping Maps all children to its Parent in a
+	 * HashMap to conveniently access the children through the parent
+	 * 
+	 * @param parents
+	 *            All unique parents occurring in the XML
+	 */
+	private void mapChildren(SortedSet<Integer> parents) {
+
+		Iterator<Integer> iterator = parents.iterator();
+		while (iterator.hasNext()) {
+			int next = iterator.next();
+			this.children.put(next, new ArrayList<Integer>());
+
+		}
+		// save the parent of every id in par and check if they are contained in
+		// parent list
+
+		for (int i : this.idMap.keySet()) {
+
+			int par = Integer.parseInt(this.idMap.get(i).get(1));
+			this.children.get(par).add(i);
+
+		}
+		for (int i : this.idMap.keySet()) {
+
+			int par = Integer.parseInt(this.idMap.get(i).get(1));
+			this.children.get(par).add(i);
+
+		}
+	}
+
+	/**
+	 * TODO Goes through the children map and sorts all children (ArrayList) of
+	 * the parents if they are linked by an edge
+	 * 
+	 * @param parent
+	 *            this is the current parent node
+	 */
+	private void sortChildren() {
+
+		// does the id exist in the destination part of an edge, if that is
+		// the case the source gets added to the children first
+
+		for (int x : this.edges.keySet()) {
+
+		}
+	}
+
+	/**
+	 * This method recursively traverses the tree nodes in a DFS way and adds
+	 * the xml lines to the string that will be the output
+	 * 
+	 * @param parent
+	 *            this is the current parent node
+	 */
+	public void recursion(int parent) {
+
+		for (int i : this.children.get(parent)) {
+
+			this.string.append(
+					"<" + this.idMap.get(i).get(2) + " id=\"" + i + "\" parent=\"" + this.idMap.get(i).get(1) + "\">");
+
+			if (this.children.containsKey(i) && i != parent) {
+				recursion(i);
+
+				// this should not be reachable
+				// } else if (i == parent) {
+				// // if this parent is the root
+				// this.root = i;
+				// continue;
+			}
+
+			this.string.append("</" + this.idMap.get(i).get(2) + ">");
+		}
+
+	}
+
+	/**
+	 * Recursively traverses the List of List and adds to final String
+	 * 
+	 * @param list
+	 * @return
+	 */
+	// public String recursion(ArrayList<ArrayList<String>> list) {
+	// ArrayList<Integer> id = new ArrayList<Integer>();
+	// StringBuilder s = new StringBuilder();
+	// for (int i = 1; i < list.size(); i++) {
+	// // create list of all id's
+	// id.add(Integer.parseInt(list.get(i).get(0)));
+	// }
+	// for (int i : id) {
+	// if (i > list.size()) {
+	// System.out.println("Array is larger than id");
+	// break;
+	// }
+	// // ids are larger than arrayindex
+	// s.append("<" + list.get(i).get(2) + " id=\"" + list.get(i).get(0) + "\"
+	// parent=\"" + list.get(i).get(1)
+	// + "\"" + "\">");
+	//
+	// ArrayList<ArrayList<String>> sublist = new
+	// ArrayList<ArrayList<String>>();
+	// // for every element with the parent n save in sublist
+	// for (int n = 1; n < list.size(); n++) {
+	// if (i == Integer.parseInt(list.get(n).get(1)))
+	// sublist.add(list.get(n));
+	// }
+	//
+	// s.append(recursion(sublist));
+	//
+	// s.append("</" + list.get(i).get(2) + " id=\"" + list.get(i).get(0) + "\"
+	// parent=\"" + list.get(i).get(1)
+	// + "\"" + "\">");
+	// }
+	// System.out.println(s.toString());
+	// return s.toString();
+	//
+	// }
+
+	static public void main(String[] args) {
+		String filename = "solala.xml";
+		// NiaXMLConverter other = new NiaXMLConverter(filename);
+		// System.out.println(other.string.toString());
+
+		for (int i = 0; i < args.length; i++) {
+			filename = args[i];
+			if (i != args.length - 1) {
+				usage();
+			}
+		}
+
+		if (filename == null) {
+			usage();
+		}
+		SAXParserFactory spf = SAXParserFactory.newInstance();
+		spf.setNamespaceAware(true);
+		try {
+			SAXParser saxParser = spf.newSAXParser();
+			XMLReader xmlReader = saxParser.getXMLReader();
+			xmlReader.setContentHandler(new NiaXMLConverter());
+
+			xmlReader.parse(convertToFileURL(filename));
+		} catch (IOException e) {
+			// Auto-generated catch block
+			e.printStackTrace();
+		} catch (SAXException e) {
+			// Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParserConfigurationException e) {
+			// Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	private static String convertToFileURL(String filename) {
+		String path = new File(filename).getAbsolutePath();
+		if (File.separatorChar != '/') {
+			path = path.replace(File.separatorChar, '/');
+		}
+
+		if (!path.startsWith("/")) {
+			path = "/" + path;
+		}
+		return "file:" + path;
+	}
+
+	private static void usage() {
+		System.err.println("Usage: SAXLocalNameCount <file.xml>");
+		System.err.println("       -usage or -help = this message");
+		System.exit(1);
+	}
+
+}

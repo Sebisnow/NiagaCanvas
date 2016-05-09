@@ -1,0 +1,30 @@
+package aPrototype;
+
+import java.io.IOException;
+
+import jkanvas.Canvas;
+import jkanvas.animation.AnimatedPosition;
+import jkanvas.io.json.JSONManager;
+import jkanvas.nodelink.DefaultEdgeRealizer;
+import jkanvas.nodelink.layout.SimpleLayoutedView;
+import jkanvas.painter.RenderpassPainter;
+import jkanvas.util.Resource;
+
+public class NiaGUI {
+
+	private final EditorUI frame;
+	private final Canvas c;
+
+	public NiaGUI() {
+		final RenderpassPainter p = new RenderpassPainter();
+		this.c = new Canvas(p, 800, 600);
+		this.c.setName("Origin");
+		this.frame = new EditorUI(c);
+
+		frame.setupGUI(p);
+
+	}
+
+	
+
+}

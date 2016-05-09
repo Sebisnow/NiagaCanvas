@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="net.sf.eclipsecs.core.config.GlobalCheckConfigurationWorkingSet">
+		<item value="0" key="sortColumn"/>
+		<item value="1" key="sortDirection"/>
+		<item value="87" key="colWidth2"/>
+		<item value="-1" key="selectedRow"/>
+		<item value="48" key="colWidth3"/>
+		<item value="162" key="colWidth0"/>
+		<item value="158" key="colWidth1"/>
+	</section>
+</section>

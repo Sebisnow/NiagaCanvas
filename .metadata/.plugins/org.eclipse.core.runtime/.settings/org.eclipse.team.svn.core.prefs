@@ -1,0 +1,5 @@
+eclipse.preferences.version=1
+externalMigrateFromAuthorizationDatabase/isMigrated=true
+migrateFromAuthorizationDatabase/isMigrated=true
+repositories/102c2207c29600151189825191683b68=102c2207c29600151189825191683b68;https\://subversion.assembla.com/svn/niagarino/;https\://subversion.assembla.com/svn/niagarino/;branches;tags;trunk;true;c6f9ce63-7535-4d5b-8497-0396066dfa4f;https\://subversion.assembla.com/svn/niagarino;;false;;;0
+repositories/e0fbb917c09600151189825191683b68=e0fbb917c09600151189825191683b68;https\://subversion.assembla.com/svn/niagarino/trunk;https\://subversion.assembla.com/svn/niagarino/trunk;branches;tags;trunk;true;c6f9ce63-7535-4d5b-8497-0396066dfa4f;https\://subversion.assembla.com/svn/niagarino;;false;;;0
