@@ -1,0 +1,11 @@
+\beamer@endinputifotherversion {3.36pt}
+\select@language {german}
+\beamer@sectionintoc {1}{Motivation f\"ur NiagarUI}{2}{0}{1}
+\beamer@sectionintoc {2}{Umsetzung}{9}{0}{2}
+\beamer@subsectionintoc {2}{1}{Projektrahmen}{9}{0}{2}
+\beamer@subsectionintoc {2}{2}{Aufgetretene Schwierigkeiten}{13}{0}{2}
+\beamer@subsectionintoc {2}{3}{Proof of Concept}{25}{0}{2}
+\beamer@sectionintoc {3}{Ausblick}{34}{0}{3}
+\beamer@subsectionintoc {3}{1}{R\"uckblick}{34}{0}{3}
+\beamer@subsectionintoc {3}{2}{Vorrausblick}{39}{0}{3}
+\beamer@sectionintoc {4}{Example Workflow}{48}{0}{4}

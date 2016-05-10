@@ -1,9 +1,0 @@
-\beamer@endinputifotherversion {3.36pt}
-\select@language {german}
-\beamer@sectionintoc {1}{Motivation f\"ur NiagarUI}{2}{0}{1}
-\beamer@subsectionintoc {1}{1}{NiagarUI}{2}{0}{1}
-\beamer@sectionintoc {2}{Umsetzung}{13}{0}{2}
-\beamer@subsectionintoc {2}{1}{Aufgetretene Schwierigkeiten}{13}{0}{2}
-\beamer@subsectionintoc {2}{2}{Proof of Concept}{19}{0}{2}
-\beamer@sectionintoc {3}{Ausblick}{25}{0}{3}
-\beamer@sectionintoc {4}{Example Workflow}{34}{0}{4}

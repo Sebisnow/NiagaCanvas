@@ -1,0 +1,291 @@
+% $Header: /Users/joseph/Documents/LaTeX/beamer/solutions/generic-talks/generic-ornate-15min-45min.de.tex,v 90e850259b8b 2007/01/28 20:48:30 tantau $
+
+\documentclass{beamer}
+
+% Diese Datei enthält eine Lösungsvorlage für:
+
+
+% - Vorträge über ein beliebiges Thema.
+% - Vortragslänge zwischen 15 und 45 Minuten. 
+% - Aussehen des Vortrags ist verschnörkelt/dekorativ.
+
+
+
+% Copyright 2004 by Till Tantau <tantau@users.sourceforge.net>.
+%
+% In principle, this file can be redistributed and/or modified under
+% the terms of the GNU Public License, version 2.
+%
+% However, this file is supposed to be a template to be modified
+% for your own needs. For this reason, if you use this file as a
+% template and not specifically distribute it as part of a another
+% package/program, I grant the extra permission to freely copy and
+% modify this file as you see fit and even to delete this copyright
+% notice. 
+
+
+
+\mode<presentation>
+{
+  \usetheme{PaloAlto}
+  \usecolortheme{seahorse}
+  % oder ...
+  
+  % Items bleiben unsichtbar bis Sie aufgedeckt werden
+  \setbeamercovered{invisible}
+  % oder auch nicht
+}
+
+
+\usepackage[german]{babel}
+% oder was auch immer
+
+\usepackage[latin1]{inputenc}
+% oder was auch immer
+
+\usepackage{times}
+\usepackage[T1]{fontenc}
+% Oder was auch immer. Zu beachten ist, das Font und Encoding passen
+% müssen. Falls T1 nicht funktioniert, kann man versuchen, die Zeile
+% mit fontenc zu löschen.
+
+
+
+% % Mieser Hack für größere Zeilenabstände
+\newlength{\wideitemsep}
+\setlength{\wideitemsep}{\itemsep}
+\addtolength{\wideitemsep}{10pt}
+\let\olditem\item
+\renewcommand{\item}{\setlength{\itemsep}{\wideitemsep}\olditem}
+
+\title[NiagarUI] % (optional, nur bei langen Titeln nötig)
+{NiagarUI}
+
+\vskip10pt
+\subtitle{Bachelor Projekt -- WS 15/16}
+\vskip35pt
+\author[] % (optional, nur bei vielen Autoren)
+{Sebastian Schneider }
+% - Der \inst{?} Befehl sollte nur verwendet werden, wenn die Autoren
+%   unterschiedlichen Instituten angehören.
+
+%\institute % (optional, aber oft nötig)
+%{
+%  \inst{1}%
+%  Institut für Informatik\\
+%  Universität Hier
+%  \and
+%  \inst{2}%
+%  Institut für theoretische Philosophie\\
+%  Universität Dort}
+% - Der \inst{?} Befehl sollte nur verwendet werden, wenn die Autoren
+%   unterschiedlichen Instituten angehören.
+% - Keep it simple, niemand interessiert sich für die genau Adresse.
+
+\date{10. Mai 2016}
+
+
+%\subject{Informatik}
+% Dies wird lediglich in den PDF Informationskatalog einfügt. Kann gut
+% weggelassen werden.
+
+
+% Falls eine Logodatei namens "university-logo-filename.xxx" vorhanden
+% ist, wobei xxx ein von latex bzw. pdflatex lesbares Graphikformat
+% ist, so kann man wie folgt ein Logo einfügen:
+
+\pgfdeclareimage[height=25pt, width=43pt]{logo}{UniLogo.jpg}
+\logo{\pgfuseimage{logo}}
+
+
+
+% Folgendes sollte gelöscht werden, wenn man nicht am Anfang jedes
+% Unterabschnitts die Gliederung nochmal sehen möchte.
+%\AtBeginSubsection[]
+%{
+%  \begin{frame}<beamer>{Gliederung}
+%    \tableofcontents[currentsection,currentsubsection]
+%  \end{frame}
+%}
+
+
+% Falls Aufzählungen immer schrittweise gezeigt werden sollen, kann
+% folgendes Kommando benutzt werden:
+
+\beamerdefaultoverlayspecification{<+->}
+
+
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\section{Motivation für NiagarUI}
+
+\begin{frame}{Warum NiagarUI?}
+	\begin{itemize}
+		\item<+-> Vereinfachte Erstellung von Plänen
+		
+	\end{itemize}
+\end{frame}
+\begin{frame}{Warum NiagarUI?}
+	\href{run:xml-plan.pdf}{Bisher wird niagarino der Plan per XML gefüttert}
+\end{frame}
+\begin{frame}{Warum NiagarUI?}
+	\begin{itemize}[<+->]
+		\item Vereinfachte Erstellung von Plänen
+		\item Veranschaulichung der Zusammenhänge eines Planes
+		\begin{itemize}
+			\item[$\rightarrow$] Benutzerfreundliche spezifikation
+		\end{itemize}
+		
+		\item NiagarUI ist ein cooler Name
+		
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{The Tao Of Programming}
+	\footnotesize{
+	 A manager asked a programmer how long it would take him to finish the program on which he was working. "\ It will be finished tomorrow,"\ the programmer promptly replied.\\\medskip
+	 
+	 "\ I think you are being unrealistic,"\ said the manager, "\ Truthfully, how long will it take?"\\\medskip
+	 
+	 The programmer thought for a moment. "\ I have some features that I wish to add. This will take at least two weeks,"\ he finally said.\\\medskip
+	 
+	 "\ Even that is too much to expect,"\ insisted the manager, "\ I will be satisfied if you simply tell me when the program is complete."
+	 
+	 The programmer agreed to this.\\\bigskip
+	 
+	 Several years later, the manager retired. On the way to his retirement luncheon, he discovered the programmer asleep at his terminal. He had been programming all night.}\begin{flushright}{ \tiny{The tao of programming by Geoffrey James, Santa Monica, Calif., InfoBooks, 1987.}}\end{flushright}
+\end{frame}
+
+\section{Umsetzung}
+\subsection{Projektrahmen}
+
+
+\begin{frame}{Geplanter Rahmen des Projektes}
+	\begin{itemize}
+		\item Erstellung einer Benutzeroberfläche zur XML generierung für niagarino
+		\item XML's sollen Format-technisch direkt in niagarino Ausführbar sein (Vorlage war XML-Datei)
+		\item Benutzeroberfläche basierend auf Framework für Graphen und Swing
+		\item Wichtigste Features: Zooming, Panning, einfügen von Knoten in anderen Knoten
+	\end{itemize}
+\end{frame}
+
+\subsection{Aufgetretene Schwierigkeiten}
+\begin{frame}{Aufgetretene Schwierigkeiten}
+	\begin{itemize}
+		\item Eigener Mangel an praktischer Erfahrung
+		\item Viele Frameworks: JGraphT, JGraphX, JUNG, JKanvas
+		\begin{itemize}
+			\item[$\rightarrow$] Einige kleine Prototypen erstellt, um Funktionalitäten zu testen
+		\end{itemize}
+		\item Keines unterstützt alle Requirements
+		\begin{itemize}
+			\item[$\rightarrow$] Min. drei Monate verschwendet mit Suche nach dem richtigen Framework
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Aufgetretene Schwierigkeiten}
+	\begin{itemize}
+		\item Aufgrund von Panning, Zooming und mangels guter Alternativen bei JKanvas geblieben
+		\item Kaum Dokumentiert da privates Projekt von Josua Krause
+		\item Viele Möglichkeiten, aber wichtige Teile fehlen oder anderst implementiert
+		\begin{itemize}
+			\item[$\rightarrow$] Fast alle Funktionalitäten mussten angepasst oder selbst implementiert werden
+		\end{itemize}
+		\item Nicht alle Operatoren im XML definiert und wie in niagarino umgesetzt
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Einschränkung des Projektrahmens}
+	\begin{itemize}
+		\item Umfang wurde zu groß im Rahmen eines Bachelorprojekts
+		\item Viele Einschränkungen zu beachten
+	\end{itemize}
+\end{frame}
+\subsection{Proof of Concept}
+\begin{frame}{Proof of Concept?}
+	\begin{itemize}
+		\item Erstellen eines Proof of Concepts das veranschaulicht, dass und wie eine dynamische Lösung möglich ist
+		\item Nutzen von Java Annotationen, um herauszufinden wie ein Operator instanziiert werden kann
+		\begin{itemize}
+			\item[$\rightarrow$] Später könnte niagarino so von NiagarUI angesteuert werden
+			% Erklären wie es funktioniert
+		\end{itemize}
+		\item Proof of Concept anhand von 2 Operatoren (Selection, TopK) mit GUI und Workflow
+		\item Was muss noch getan werden, um weitere Operatoren in GUI zu integrieren
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Proof of Concept!}
+	\begin{itemize}
+		\item Die zwei Operatoren wurden ausgewählt, um Machbarkeit, Prinzip und Weg zu veranschaulichen
+		\item Nutzen von Reflections, um auf Operatoren zuzugreifen und sie \textit{auszulesen} und nutzbar zu machen
+		\begin{itemize}
+			\item[$\rightarrow$] Ändern sich die Operatoren in niagarino ändert sich die GUI automatisch und angepasstes XML wird generiert
+			% Erklären wie es funktioniert
+		\end{itemize}
+		\item GUI zur benutzerfreundlichen Planerstellung und Visualisierung
+		%TODO go into Code to show ParamDescriptions and Annotations 
+	\end{itemize}
+\end{frame}
+
+\section{Ausblick}
+\subsection{Rückblick}
+\begin{frame}{Zusammenfassung}
+	
+	\begin{itemize}
+		\item Intensive 8 Monate (Trotz Einschränkung Rahmen gut genutzt)
+		\item Viel gelernt!
+		\begin{itemize}
+			\item Frameworks machen nicht alles leichter
+			\item Extrem wichtig die Anforderungen genau (und richtig) feszuhalten und zu definieren
+			\item Komplett eigenständiges programmieren
+		\end{itemize}
+		
+		
+		
+	\end{itemize}
+\end{frame}
+
+\subsection{Vorrausblick}
+\begin{frame}{Vom Proof of Concept zu Version 1.0}
+	
+	\begin{itemize}
+		\item Alle Operatoren integrieren
+		\begin{itemize}
+			\item Annotationen zu allen Operatoren hinzufügen um sie herausfiltern zu können
+			\item Zwei statische Methoden pro Operator erstellen die den Operator beschreiben und eine zur instanziierung
+			\item Definieren wie spezielle Attribute (Functions, Group) implementiert und in XML übersetzt werden sollen
+		\end{itemize}
+		
+		\item Benutzeroberfläche verschönern und um weitere Feature erweitern
+		
+		\item Nutzerhandbuch
+		
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Ausblick}
+	
+	\begin{itemize}
+		\item XML-Pläne einlesen
+		
+		\item Wenn wir Reflections bereits nutzen, warum dann nicht gleich Plan in niagarino ausführen?
+		
+		\item Dynamische Elemente mit einbauen -> Visualisierung der Arbeit der Operatoren direkt in GUI
+		
+	\end{itemize}
+\end{frame}
+\section{Example Workflow}
+\begin{frame}{Beispiel}
+	\href{http://www.blockchain.info}{Verdienstmöglichkeiten im Handel mit Bitcoins anhand von Gebühren}
+
+\end{frame}
+
+\end{document}
