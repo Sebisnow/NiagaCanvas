@@ -1,7 +1,7 @@
 \beamer@endinputifotherversion {3.36pt}
 \headcommand {\slideentry {0}{0}{1}{1/1}{}{0}}
 \headcommand {\beamer@framepages {1}{1}}
-\headcommand {\sectionentry {1}{Motivation f\"ur NiagarUI}{2}{Motivation f\"ur NiagarUI}{0}}
+\headcommand {\sectionentry {1}{Motivation f\"ur NiaGUI}{2}{Motivation f\"ur NiaGUI}{0}}
 \headcommand {\beamer@sectionpages {1}{1}}
 \headcommand {\beamer@subsectionpages {1}{1}}
 \headcommand {\slideentry {1}{0}{1}{2/2}{}{0}}
@@ -36,18 +36,23 @@
 \headcommand {\beamer@subsectionentry {0}{3}{1}{34}{R\"uckblick}}\headcommand {\beamer@subsectionpages {34}{33}}
 \headcommand {\slideentry {3}{1}{1}{34/38}{R\"uckblick}{0}}
 \headcommand {\beamer@framepages {34}{38}}
-\headcommand {\beamer@subsectionentry {0}{3}{2}{39}{Vorrausblick}}\headcommand {\beamer@subsectionpages {34}{38}}
-\headcommand {\slideentry {3}{2}{1}{39/44}{Vorrausblick}{0}}
-\headcommand {\beamer@framepages {39}{44}}
-\headcommand {\slideentry {3}{2}{2}{45/47}{Vorrausblick}{0}}
-\headcommand {\beamer@framepages {45}{47}}
-\headcommand {\sectionentry {4}{Example Workflow}{48}{Example Workflow}{0}}
-\headcommand {\beamer@sectionpages {34}{47}}
-\headcommand {\beamer@subsectionpages {39}{47}}
-\headcommand {\slideentry {4}{0}{1}{48/48}{}{0}}
-\headcommand {\beamer@framepages {48}{48}}
-\headcommand {\beamer@partpages {1}{48}}
-\headcommand {\beamer@subsectionpages {48}{48}}
-\headcommand {\beamer@sectionpages {48}{48}}
-\headcommand {\beamer@documentpages {48}}
-\headcommand {\def \inserttotalframenumber {15}}
+\headcommand {\beamer@subsectionentry {0}{3}{2}{39}{Example Workflow}}\headcommand {\beamer@subsectionpages {34}{38}}
+\headcommand {\slideentry {3}{2}{1}{39/39}{Example Workflow}{0}}
+\headcommand {\beamer@framepages {39}{39}}
+\headcommand {\sectionentry {4}{Fazit}{40}{Fazit}{0}}
+\headcommand {\beamer@sectionpages {34}{39}}
+\headcommand {\beamer@subsectionpages {39}{39}}
+\headcommand {\beamer@subsectionentry {0}{4}{1}{40}{Vorrausblick}}\headcommand {\beamer@subsectionpages {40}{39}}
+\headcommand {\slideentry {4}{1}{1}{40/45}{Vorrausblick}{0}}
+\headcommand {\beamer@framepages {40}{45}}
+\headcommand {\slideentry {4}{1}{2}{46/48}{Vorrausblick}{0}}
+\headcommand {\beamer@framepages {46}{48}}
+\headcommand {\slideentry {4}{1}{3}{49/52}{Vorrausblick}{0}}
+\headcommand {\beamer@framepages {49}{52}}
+\headcommand {\slideentry {4}{1}{4}{53/53}{Vorrausblick}{0}}
+\headcommand {\beamer@framepages {53}{53}}
+\headcommand {\beamer@partpages {1}{53}}
+\headcommand {\beamer@subsectionpages {40}{53}}
+\headcommand {\beamer@sectionpages {40}{53}}
+\headcommand {\beamer@documentpages {53}}
+\headcommand {\def \inserttotalframenumber {17}}
